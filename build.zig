@@ -8,23 +8,29 @@ pub fn build(b: *std.build.Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
 
-    // init flex
+    // flex
     const c_args = [_][]const u8{
         "-std=c99",
     };
 
-    exe.linkLibC();
     exe.addIncludePath("src/c/include");
     exe.addCSourceFile("src/c/myadd.c", &c_args);
     exe.addCSourceFile("src/c/flex.c", &c_args);
     exe.addCSourceFile("src/c/myflex.c", &c_args);
 
-    // init sdl
-    const sdl_path = "D:\\SDL2-2.0.14\\";
+    // sdl
+    const sdl_path = "D:/SDL2-2.0.14/";
     exe.addIncludePath(sdl_path ++ "include");
-    exe.addLibraryPath(sdl_path ++ "lib\\x64");
-    b.installBinFile(sdl_path ++ "lib\\x64\\SDL2.dll", "SDL2.dll");
+    exe.addLibraryPath(sdl_path ++ "lib/x64");
+    b.installBinFile(sdl_path ++ "lib/x64/SDL2.dll", "SDL2.dll");
     exe.linkSystemLibrary("sdl2");
+
+    // qjs
+    exe.addIncludePath("lib/quickjs/include");
+    exe.addLibraryPath("lib/quickjs");
+    b.installBinFile("lib/quickjs/libquickjs.dll", "libquickjs.dll");
+    exe.linkSystemLibrary("quickjs");
+
     exe.linkLibC();
     exe.install();
 
