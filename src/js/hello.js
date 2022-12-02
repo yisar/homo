@@ -1,4 +1,7 @@
-function hello(){
-    console.log("hello");
-};
-hello();
+const { h, render } = this.fre;
+
+function App() {
+  return h("div", {}, "hello world");
+}
+
+render(h(App, {}));
