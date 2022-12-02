@@ -1,3 +1,6 @@
+#ifndef __FLEX_H_
+# define __FLEX_H_
+
 struct flex_item;
 
 struct flex_item *flex_item_new(void);
@@ -6,7 +9,7 @@ void flex_item_free(struct flex_item *item);
 void flex_item_add(struct flex_item *item, struct flex_item *child);
 void flex_item_insert(struct flex_item *item, unsigned int index,
         struct flex_item *child);
-struct flex_item *flex_item_delete(struct flex_item *item, unsigned int index);
+void flex_item_delete(struct flex_item *item, unsigned int index);
 unsigned int flex_item_count(struct flex_item *item);
 struct flex_item *flex_item_child(struct flex_item *item, unsigned int index);
 struct flex_item *flex_item_parent(struct flex_item *item);
@@ -51,6 +54,14 @@ typedef enum {
     type flex_item_get_##name(struct flex_item *item); \
     void flex_item_set_##name(struct flex_item *item, type value);
 # endif
+
+#else // !__FLEX_H_
+
+# ifndef FLEX_ATTRIBUTE
+#  define FLEX_ATTRIBUTE(name, type)
+# endif
+
+#endif
 
 FLEX_ATTRIBUTE(width, float)
 FLEX_ATTRIBUTE(height, float)

@@ -1,4 +1,4 @@
-#include "flex.h"
+#include "./include/flex.h"
 
 static struct flex_item *
 flex_item_with_size(float width, float height)
@@ -9,7 +9,7 @@ flex_item_with_size(float width, float height)
     return item;
 }
 
-void test_basis1(void)
+void myflex(void)
 {
     struct flex_item *root = flex_item_with_size(100, 100);
 
