@@ -1,2 +1,7 @@
 # fre-embed
-Fre embed
+> Fre embed GUI
+
+### Run
+```shell
+zig build run
+```

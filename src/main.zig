@@ -5,17 +5,37 @@ const sdl = @cImport({
 const my = @cImport({
     @cInclude("my.h");
 });
+const qjs = @cImport({
+    @cInclude("quickjs.h");
+});
 
 const print = std.debug.print;
 
 pub fn main() anyerror!void {
     add();
+    qjsAdd();
     runSDL();
 }
 
 fn add() void {
     const val = my.add(1, 2);
     print("result is {}\n", .{val});
+}
+
+fn qjsAdd() void {
+    const runtime = qjs.JS_NewRuntime();
+    const context = qjs.JS_NewContext(runtime);
+
+    // var file = try std.fs.cwd().openFile("./js/hello.js", .{ .mode = .read_only });
+    // const file_size = (try file.stat()).size;
+    // const allocator = std.heap.page_allocator;
+    // var buffer = try allocator.alloc(u8, file_size);
+    // try file.reader().readNoEof(buffer);
+    const str = "function transform(a,b){return  (a^2/Math.sin(2*Math.PI/b))-a/2;}";
+
+    var res: qjs.JSValue = qjs.JS_Eval(context, str, str.len, "", 0);
+
+    print("{}", .{res});
 }
 
 fn runSDL() void {
