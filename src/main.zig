@@ -1,20 +1,62 @@
 const std = @import("std");
-const print = std.debug.print;
-
-const withc = @cImport({
+const sdl = @cImport({
+    @cInclude("SDL.h");
+});
+const my = @cImport({
     @cInclude("my.h");
 });
 
-pub fn main() void {
-    const val = zigAdd(1, 2);
+const print = std.debug.print;
+
+pub fn main() anyerror!void {
+    add();
+    runSDL();
+}
+
+fn add() void {
+    const val = my.add(1, 2);
     print("result is {}\n", .{val});
 }
 
-fn zigAdd(a: i32, b: i32) i32 {
-    return withc.add(a, b);
-}
+fn runSDL() void {
+    _ = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
+    defer sdl.SDL_Quit();
 
-test "zig with c test" {
-    const t = std.testing;
-    try t.expectEqual(@intCast(i32, 8), zigAdd(3, 5));
+    var window = sdl.SDL_CreateWindow("hello Fre embed!", sdl.SDL_WINDOWPOS_CENTERED, sdl.SDL_WINDOWPOS_CENTERED, 640, 400, 0);
+    defer sdl.SDL_DestroyWindow(window);
+
+    var renderer = sdl.SDL_CreateRenderer(window, 0, sdl.SDL_RENDERER_PRESENTVSYNC);
+    defer sdl.SDL_DestroyRenderer(renderer);
+
+    var frame: usize = 0;
+    mainloop: while (true) {
+        var sdl_event: sdl.SDL_Event = undefined;
+        while (sdl.SDL_PollEvent(&sdl_event) != 0) {
+            switch (sdl_event.type) {
+                sdl.SDL_QUIT => break :mainloop,
+                else => {},
+            }
+        }
+
+        _ = sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+        _ = sdl.SDL_RenderClear(renderer);
+        var rect = sdl.SDL_Rect{ .x = 0, .y = 0, .w = 60, .h = 60 };
+        const a = 0.06 * @intToFloat(f32, frame);
+        const t = 2 * std.math.pi / 3.0;
+        const r = 100 * @cos(0.1 * a);
+        rect.x = 290 + @floatToInt(i32, r * @cos(a));
+        rect.y = 170 + @floatToInt(i32, r * @sin(a));
+        _ = sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0xff);
+        _ = sdl.SDL_RenderFillRect(renderer, &rect);
+        rect.x = 290 + @floatToInt(i32, r * @cos(a + t));
+        rect.y = 170 + @floatToInt(i32, r * @sin(a + t));
+        _ = sdl.SDL_SetRenderDrawColor(renderer, 0, 0xff, 0, 0xff);
+        _ = sdl.SDL_RenderFillRect(renderer, &rect);
+        rect.x = 290 + @floatToInt(i32, r * @cos(a + 2 * t));
+        rect.y = 170 + @floatToInt(i32, r * @sin(a + 2 * t));
+        _ = sdl.SDL_SetRenderDrawColor(renderer, 0, 0, 0xff, 0xff);
+        _ = sdl.SDL_RenderFillRect(renderer, &rect);
+        sdl.SDL_RenderPresent(renderer);
+        frame += 1;
+    }
 }

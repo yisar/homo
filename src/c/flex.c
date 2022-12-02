@@ -4,11 +4,11 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "flex.h"
+#include "./include/flex.h"
 
 struct flex_item {
 #define FLEX_ATTRIBUTE(name, type, def) type name;
-#include "flex.h"
+#include "./include/flex.h"
 
     float frame[4];
     struct flex_item *parent;
@@ -22,7 +22,7 @@ struct flex_item {
 
 typedef enum {
 #define FLEX_ATTRIBUTE(name, type, def) FLEX_PROPERTY_##name,
-#include "flex.h"
+#include "./include/flex.h"
 } flex_property;
 
 static void
@@ -50,7 +50,7 @@ item_property_changed(struct flex_item *item, flex_property property)
         item->name = value; \
         item_property_changed(item, FLEX_PROPERTY_##name); \
     }
-#include "flex.h"
+#include "./include/flex.h"
 
 DLLEXPORT
 struct flex_item *
@@ -61,7 +61,7 @@ flex_item_new(void)
     assert(item != NULL);
 
 #define FLEX_ATTRIBUTE(name, type, def) item->name = def;
-#include "flex.h"
+#include "./include/flex.h"
 
     memset(item->frame, 0, sizeof item->frame);
 
