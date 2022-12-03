@@ -9,8 +9,8 @@ const MAX_FILE_SIZE: usize = 4 * 1024 * 1024;
 const fs = std.fs;
 const mem = std.mem;
 
-fn set_int(ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, _: [*c]qjs.JSValue) callconv(.C) qjs.JSValue {
-    return qjs.JS_NewInt64(js_ctx,123);
+fn greet(js_ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, _: [*c]qjs.JSValue) callconv(.C) qjs.JSValue {
+    return qjs.JS_NewInt64(js_ctx, 123);
 }
 
 fn evalFile(allocator: std.mem.Allocator, src: []u8) ![]u8 {
@@ -56,10 +56,10 @@ pub fn main() !void {
         qjs.js_std_add_helpers(js_context, 0, null);
 
         var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
-        _ = qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 0));
-        // var r: qjs.JSValue = qjs.JS_GetPropertyStr(js_context, global, "test");
 
-        // print("{}", .{r});
+        var greetfn: qjs.JSValue = qjs.JS_NewCFunction(js_context, greet, "greet", 0);
+        defer qjs.JS_FreeValue(js_context, global);
+        _ = qjs.JS_SetPropertyStr(js_context, global, "greet", greetfn);
 
         const val = qjs.JS_Eval(js_context, load_std, load_std.len, "<input>", qjs.JS_EVAL_TYPE_MODULE);
         if (qjs.JS_IsException(val) > 0) {
