@@ -1,0 +1,1 @@
+error: expected type '*const fn(?*cimport.struct_JSContext, cimport.struct_JSValue, c_int, [*c]cimport.struct_JSValue) callconv(.C) cimport.struct_JSValue', found '*const fn(*cimport.struct_JSContext, cimport.struct_JSValue, c_int, [*c]cimport.struct_JSValue) callconv(.C) cimport.struct_JSValue'

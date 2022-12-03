@@ -2,24 +2,24 @@ const std = @import("std");
 
 const print = std.debug.print;
 
-const qjs = @cImport(@cInclude("quickjs-libc.h"));
+const qjs = @import("./qjs.zig");
 
-const MAX_FILE_SIZE: usize = 4*1024 * 1024;
+const MAX_FILE_SIZE: usize = 4 * 1024 * 1024;
 
 const fs = std.fs;
 const mem = std.mem;
 
-fn set_int(context: *qjs.JSContext,_:qjs.JSValue,_:i32,_:[]*qjs.JSValue) callconv(.C) qjs.JSValue{
+fn set_int(ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, _: [*c]qjs.JSValue) callconv(.C) qjs.JSValue {
     const str = "console.log(123)";
 
-    var jsval: qjs.JSValue = qjs.JS_Eval(context, str, str.len, "", 0);
+    var jsval: qjs.JSValue = qjs.JS_Eval(ctx, str, str.len, "", 0);
+
     return jsval;
 }
 
-
 pub fn main() !void {
     const js_src = "const main = () => {console.log(\"hello world!\")};main();";
-                           
+
     {
         const load_std =
             \\ import * as std from 'std';
@@ -44,12 +44,11 @@ pub fn main() !void {
 
         qjs.js_std_add_helpers(js_context, 0, null);
 
-    var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
-    qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 0));
-    var r:qjs.JSValue=qjs.JS_GetPropertyStr(js_context,global,"test");
+        var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
+        qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 1));
+        var r: qjs.JSValue = qjs.JS_GetPropertyStr(js_context, global, "test");
 
-    print("{}", .{r});
-
+        print("{}", .{r});
 
         const val = qjs.JS_Eval(js_context, load_std, load_std.len, "<input>", qjs.JS_EVAL_TYPE_MODULE);
         if (qjs.JS_IsException(val) > 0) {
