@@ -26,14 +26,15 @@ fn qjsAdd() void {
     const runtime = qjs.JS_NewRuntime();
     const context = qjs.JS_NewContext(runtime);
 
-    // var file = try std.fs.cwd().openFile("./js/hello.js", .{ .mode = .read_only });
-    // const file_size = (try file.stat()).size;
-    // const allocator = std.heap.page_allocator;
-    // var buffer = try allocator.alloc(u8, file_size);
-    // try file.reader().readNoEof(buffer);
     const str = "console.log(123);";
 
     var res: qjs.JSValue = qjs.JS_Eval(context, str, str.len, "", 0);
+
+    // var global: qjs.JSValue = qjs.JS_GetGlobalObject(context);
+
+    // var str2 = qjs.JS_ToCString(context, res);
+
+    // qjs.JS_SetPropertyStr(context, global, "str", "");
 
     print("{}", .{res});
 }
