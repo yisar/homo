@@ -10,11 +10,7 @@ const fs = std.fs;
 const mem = std.mem;
 
 fn set_int(ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, _: [*c]qjs.JSValue) callconv(.C) qjs.JSValue {
-    const str = "console.log(123)";
-
-    var jsval: qjs.JSValue = qjs.JS_Eval(ctx, str, str.len, "", 0);
-
-    return jsval;
+    return qjs.JS_NewInt64(js_ctx,123);
 }
 
 fn evalFile(allocator: std.mem.Allocator, src: []u8) ![]u8 {
@@ -59,8 +55,8 @@ pub fn main() !void {
 
         qjs.js_std_add_helpers(js_context, 0, null);
 
-        // var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
-        // qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 0));
+        var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
+        _ = qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 0));
         // var r: qjs.JSValue = qjs.JS_GetPropertyStr(js_context, global, "test");
 
         // print("{}", .{r});
