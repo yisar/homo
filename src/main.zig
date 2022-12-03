@@ -17,8 +17,27 @@ fn set_int(ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, _: [*c]qjs.JSValue) c
     return jsval;
 }
 
+fn evalFile(allocator: std.mem.Allocator, src: []u8) ![]u8 {
+    var js_src = std.ArrayList(u8).init(allocator);
+    var js_wtr = js_src.writer();
+    _ = try js_wtr.print("{s}", .{src[0..src.len]});
+    _ = try js_wtr.write("\x00");//fix quickjs bug
+    const srcs = js_src.toOwnedSlice();
+    return srcs;
+}
+
 pub fn main() !void {
-    const js_src = "const main = () => {console.log(\"hello world!\")};main();";
+    const allocator = std.heap.c_allocator;
+    var argIter = try std.process.argsWithAllocator(allocator);
+    _ = argIter.next();
+    const file = mem.span(argIter.next()) orelse return error.InvalidSource;
+
+    const cwd = fs.cwd();
+    const src = try cwd
+        .readFileAlloc(allocator, file, MAX_FILE_SIZE);
+    defer allocator.free(src);
+
+    const js_src = try evalFile(allocator, src);
 
     {
         const load_std =
@@ -44,18 +63,18 @@ pub fn main() !void {
 
         qjs.js_std_add_helpers(js_context, 0, null);
 
-        var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
-        qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 1));
-        var r: qjs.JSValue = qjs.JS_GetPropertyStr(js_context, global, "test");
+        // var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
+        // qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 1));
+        // var r: qjs.JSValue = qjs.JS_GetPropertyStr(js_context, global, "test");
 
-        print("{}", .{r});
+        // print("{}", .{r});
 
         const val = qjs.JS_Eval(js_context, load_std, load_std.len, "<input>", qjs.JS_EVAL_TYPE_MODULE);
         if (qjs.JS_IsException(val) > 0) {
             qjs.js_std_dump_error(js_context);
         }
 
-        const val2 = qjs.JS_Eval(js_context, js_src, js_src.len - 1, "<file>", qjs.JS_EVAL_TYPE_GLOBAL);
+        const val2 = qjs.JS_Eval(js_context, js_src.ptr, js_src.len - 1, "<file>", qjs.JS_EVAL_TYPE_GLOBAL);
         if (qjs.JS_IsException(val2) > 0) {
             qjs.js_std_dump_error(js_context);
         }
