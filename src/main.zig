@@ -11,6 +11,8 @@ const qjs = @cImport({
 
 const print = std.debug.print;
 
+const CallbackInfo = opaque {};
+
 pub fn main() anyerror!void {
     add();
     qjsAdd();
@@ -22,21 +24,36 @@ fn add() void {
     print("result is {}\n", .{val});
 }
 
+fn set_int(context: qjs.JSContext) qjs.JSValue{
+    const str = "console.log(123)";
+
+    var jsval: qjs.JSValue = qjs.JS_Eval(context, str, str.len, "", 0);
+    return jsval;
+}
+
+
+
+// static JSValue near_input(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
+// {
+//   uint64_t register_id;
+
+//   if (JS_ToUint64Ext(ctx, &register_id, argv[0]) < 0) {
+//     return JS_ThrowTypeError(ctx, "Expect Uint64 for register_id");
+//   }
+//   input(register_id);
+//   return JS_UNDEFINED;
+// }
+
 fn qjsAdd() void {
     const runtime = qjs.JS_NewRuntime();
     const context = qjs.JS_NewContext(runtime);
 
-    const str = "console.log(123);";
 
-    var res: qjs.JSValue = qjs.JS_Eval(context, str, str.len, "", 0);
+    var global: qjs.JSValue = qjs.JS_GetGlobalObject(context);
+    qjs.JS_SetPropertyStr(context, global, "test", qjs.JS_NewCFunction(context, set_int, "set_int", 0));
+    var r:qjs.JSValue=qjs.JS_GetPropertyStr(context,global,"test");
 
-    // var global: qjs.JSValue = qjs.JS_GetGlobalObject(context);
-
-    // var str2 = qjs.JS_ToCString(context, res);
-
-    // qjs.JS_SetPropertyStr(context, global, "str", "");
-
-    print("{}", .{res});
+    print("{}", .{r});
 }
 
 fn runSDL() void {
