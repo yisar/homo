@@ -31,7 +31,7 @@ fn qjsAdd() void {
     // const allocator = std.heap.page_allocator;
     // var buffer = try allocator.alloc(u8, file_size);
     // try file.reader().readNoEof(buffer);
-    const str = "function transform(a,b){return  (a^2/Math.sin(2*Math.PI/b))-a/2;}";
+    const str = "console.log(123);";
 
     var res: qjs.JSValue = qjs.JS_Eval(context, str, str.len, "", 0);
 

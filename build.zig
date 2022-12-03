@@ -31,12 +31,6 @@ pub fn build(b: *std.build.Builder) void {
     b.installBinFile("lib/quickjs/libquickjs.dll", "libquickjs.dll");
     exe.linkSystemLibrary("quickjs");
 
-    // pthread
-    exe.addIncludePath("lib/pthread/include");
-    exe.addLibraryPath("lib/pthread");
-    b.installBinFile("lib/pthread/pthreadGC2.dll", "pthreadGC2.dll");
-    exe.linkSystemLibrary("pthread");
-
     exe.linkLibC();
     exe.install();
 
