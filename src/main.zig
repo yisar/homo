@@ -60,7 +60,7 @@ pub fn main() !void {
         qjs.js_std_add_helpers(js_context, 0, null);
 
         // var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
-        // qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 1));
+        // qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 0));
         // var r: qjs.JSValue = qjs.JS_GetPropertyStr(js_context, global, "test");
 
         // print("{}", .{r});
