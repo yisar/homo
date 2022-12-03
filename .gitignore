@@ -1,6 +1,3 @@
-*.o
-zig-cache/
+**/node_modules
 zig-out/
-*~
-**/**/**/node_modules/
-**/**/node_modules/
+zig-cache/

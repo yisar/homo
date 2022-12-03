@@ -1,30 +1,15 @@
 const std = @import("std");
-const sdl = @cImport({
-    @cInclude("SDL.h");
-});
-const my = @cImport({
-    @cInclude("my.h");
-});
-const qjs = @cImport({
-    @cInclude("quickjs.h");
-});
 
 const print = std.debug.print;
 
-const CallbackInfo = opaque {};
+const qjs = @cImport(@cInclude("quickjs-libc.h"));
 
-pub fn main() anyerror!void {
-    add();
-    qjsAdd();
-    runSDL();
-}
+const MAX_FILE_SIZE: usize = 4*1024 * 1024;
 
-fn add() void {
-    const val = my.add(1, 2);
-    print("result is {}\n", .{val});
-}
+const fs = std.fs;
+const mem = std.mem;
 
-fn set_int(context: qjs.JSContext) qjs.JSValue{
+fn set_int(context: *qjs.JSContext,_:qjs.JSValue,_:i32,_:[]*qjs.JSValue) callconv(.C) qjs.JSValue{
     const str = "console.log(123)";
 
     var jsval: qjs.JSValue = qjs.JS_Eval(context, str, str.len, "", 0);
@@ -32,69 +17,50 @@ fn set_int(context: qjs.JSContext) qjs.JSValue{
 }
 
 
+pub fn main() !void {
+    const js_src = "const main = () => {console.log(\"hello world!\")};main();";
+                           
+    {
+        const load_std =
+            \\ import * as std from 'std';
+            \\ import * as os from 'os';
+            \\ globalThis.std = std;
+            \\ globalThis.os = os;
+        ;
 
-// static JSValue near_input(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
-// {
-//   uint64_t register_id;
+        var js_runtime: *qjs.JSRuntime = qjs.JS_NewRuntime().?;
+        defer qjs.JS_FreeRuntime(js_runtime);
 
-//   if (JS_ToUint64Ext(ctx, &register_id, argv[0]) < 0) {
-//     return JS_ThrowTypeError(ctx, "Expect Uint64 for register_id");
-//   }
-//   input(register_id);
-//   return JS_UNDEFINED;
-// }
+        var js_context = qjs.JS_NewContext(js_runtime);
+        defer qjs.JS_FreeContext(js_context);
 
-fn qjsAdd() void {
-    const runtime = qjs.JS_NewRuntime();
-    const context = qjs.JS_NewContext(runtime);
+        _ = qjs.js_init_module_std(js_context, "std");
+        _ = qjs.js_init_module_os(js_context, "os");
 
+        qjs.js_std_init_handlers(js_runtime);
+        defer qjs.js_std_free_handlers(js_runtime);
 
-    var global: qjs.JSValue = qjs.JS_GetGlobalObject(context);
-    qjs.JS_SetPropertyStr(context, global, "test", qjs.JS_NewCFunction(context, set_int, "set_int", 0));
-    var r:qjs.JSValue=qjs.JS_GetPropertyStr(context,global,"test");
+        qjs.JS_SetModuleLoaderFunc(js_runtime, null, qjs.js_module_loader, null);
+
+        qjs.js_std_add_helpers(js_context, 0, null);
+
+    var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
+    qjs.JS_SetPropertyStr(js_context, global, "test", qjs.JS_NewCFunction(js_context, set_int, "set_int", 0));
+    var r:qjs.JSValue=qjs.JS_GetPropertyStr(js_context,global,"test");
 
     print("{}", .{r});
-}
 
-fn runSDL() void {
-    _ = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
-    defer sdl.SDL_Quit();
 
-    var window = sdl.SDL_CreateWindow("hello Fre embed!", sdl.SDL_WINDOWPOS_CENTERED, sdl.SDL_WINDOWPOS_CENTERED, 640, 400, 0);
-    defer sdl.SDL_DestroyWindow(window);
-
-    var renderer = sdl.SDL_CreateRenderer(window, 0, sdl.SDL_RENDERER_PRESENTVSYNC);
-    defer sdl.SDL_DestroyRenderer(renderer);
-
-    var frame: usize = 0;
-    mainloop: while (true) {
-        var sdl_event: sdl.SDL_Event = undefined;
-        while (sdl.SDL_PollEvent(&sdl_event) != 0) {
-            switch (sdl_event.type) {
-                sdl.SDL_QUIT => break :mainloop,
-                else => {},
-            }
+        const val = qjs.JS_Eval(js_context, load_std, load_std.len, "<input>", qjs.JS_EVAL_TYPE_MODULE);
+        if (qjs.JS_IsException(val) > 0) {
+            qjs.js_std_dump_error(js_context);
         }
 
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
-        _ = sdl.SDL_RenderClear(renderer);
-        var rect = sdl.SDL_Rect{ .x = 0, .y = 0, .w = 60, .h = 60 };
-        const a = 0.06 * @intToFloat(f32, frame);
-        const t = 2 * std.math.pi / 3.0;
-        const r = 100 * @cos(0.1 * a);
-        rect.x = 290 + @floatToInt(i32, r * @cos(a));
-        rect.y = 170 + @floatToInt(i32, r * @sin(a));
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0xff);
-        _ = sdl.SDL_RenderFillRect(renderer, &rect);
-        rect.x = 290 + @floatToInt(i32, r * @cos(a + t));
-        rect.y = 170 + @floatToInt(i32, r * @sin(a + t));
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0, 0xff, 0, 0xff);
-        _ = sdl.SDL_RenderFillRect(renderer, &rect);
-        rect.x = 290 + @floatToInt(i32, r * @cos(a + 2 * t));
-        rect.y = 170 + @floatToInt(i32, r * @sin(a + 2 * t));
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0, 0, 0xff, 0xff);
-        _ = sdl.SDL_RenderFillRect(renderer, &rect);
-        sdl.SDL_RenderPresent(renderer);
-        frame += 1;
+        const val2 = qjs.JS_Eval(js_context, js_src, js_src.len - 1, "<file>", qjs.JS_EVAL_TYPE_GLOBAL);
+        if (qjs.JS_IsException(val2) > 0) {
+            qjs.js_std_dump_error(js_context);
+        }
+
+        qjs.js_std_loop(js_context);
     }
 }
