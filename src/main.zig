@@ -20,8 +20,7 @@ fn set_int(ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, _: [*c]qjs.JSValue) c
 fn evalFile(allocator: std.mem.Allocator, src: []u8) ![]u8 {
     var js_src = std.ArrayList(u8).init(allocator);
     var js_wtr = js_src.writer();
-    _ = try js_wtr.print("{s}", .{src[0..src.len]});
-    _ = try js_wtr.write("\x00");//fix quickjs bug
+    _ = try js_wtr.print("{s}\x00", .{src[0..src.len]});
     const srcs = js_src.toOwnedSlice();
     return srcs;
 }
@@ -31,10 +30,7 @@ pub fn main() !void {
     var argIter = try std.process.argsWithAllocator(allocator);
     _ = argIter.next();
     const file = mem.span(argIter.next()) orelse return error.InvalidSource;
-
-    const cwd = fs.cwd();
-    const src = try cwd
-        .readFileAlloc(allocator, file, MAX_FILE_SIZE);
+    const src = try fs.cwd().readFileAlloc(allocator, file, MAX_FILE_SIZE);
     defer allocator.free(src);
 
     const js_src = try evalFile(allocator, src);
