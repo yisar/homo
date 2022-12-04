@@ -6,15 +6,15 @@ pub fn build(b: *std.build.Builder) void {
     const mode = b.standardReleaseOptions();
 
     const quickjs = b.addStaticLibrary("quickjs", "src/dummy.zig");
-    quickjs.addIncludePath("deps/quickjs");
+    quickjs.addIncludePath("clib/quickjs");
     quickjs.disable_sanitize_c = true;
     quickjs.addCSourceFiles(&.{
-        "deps/quickjs/cutils.c",
-        "deps/quickjs/libbf.c",
-        "deps/quickjs/libunicode.c",
-        "deps/quickjs/quickjs-libc.c",
-        "deps/quickjs/quickjs.c",
-        "deps/quickjs/libregexp.c",
+        "clib/quickjs/cutils.c",
+        "clib/quickjs/libbf.c",
+        "clib/quickjs/libunicode.c",
+        "clib/quickjs/quickjs-libc.c",
+        "clib/quickjs/quickjs.c",
+        "clib/quickjs/libregexp.c",
     }, &.{
         "-g",
         "-Wall",
@@ -30,14 +30,14 @@ pub fn build(b: *std.build.Builder) void {
     const exe = b.addExecutable("fre", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
-    exe.addIncludePath("deps/quickjs");
+    exe.addIncludePath("clib/quickjs");
     exe.linkLibC();
     exe.linkLibrary(quickjs);
     exe.install();
 
     if (target.getOsTag() == .windows) {
-        quickjs.addIncludePath("deps/mingw-w64-winpthreads/include");
-        exe.addObjectFile("deps/mingw-w64-winpthreads/lib/libpthread.a");
+        quickjs.addIncludePath("clib/mingw-w64-winpthreads/include");
+        exe.addObjectFile("clib/mingw-w64-winpthreads/lib/libpthread.a");
     }
 
     const run_cmd = exe.run();
