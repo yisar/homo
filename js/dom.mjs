@@ -13,8 +13,9 @@ export function dom() {
       child.parentNode = this;
       this.childNodes.push(child);
       if (this.children && child.nodeType === 1) this.children.push(child);
+
       mutation(this, "childList", {
-        addedNodes: [child],
+        addedNodes: child,
         previousSibling: this.childNodes[this.childNodes.length - 2],
       });
     }
@@ -188,7 +189,7 @@ export function dom() {
   }
 
   function mutation(target, type, record) {
-    record.target = target;
+    record.target = target.__id; // 这里暂时只保留 id
     record.type = type;
 
     for (let i = observers.length; i--; ) {
@@ -282,7 +283,7 @@ export function dom() {
 }
 
 function assign(obj, props) {
-  for (let i in props) obj[i] = props[i]; // eslint-disable-line guard-for-in
+  for (let i in props) obj[i] = props[i];
 }
 
 function toLower(str) {
