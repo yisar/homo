@@ -11,24 +11,18 @@ const assert = @import("std").debug.assert;
 pub usingnamespace sdl;
 
 pub fn runsdl() anyerror!void {
-if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO | sdl.SDL_INIT_AUDIO) != 0) {
-        sdl.SDL_Log("Unable to initialize SDL: %s", sdl.SDL_GetError());
-        return error.SDLInitializationFailed;
-    }
+    _=sdl.SDL_Init(sdl.SDL_INIT_VIDEO | sdl.SDL_INIT_AUDIO);
     defer sdl.SDL_Quit();
 
     var window: ?*sdl.SDL_Window = null;
     var renderer: ?*sdl.SDL_Renderer = null;
-    if (sdl.SDL_CreateWindowAndRenderer(
+    _=sdl.SDL_CreateWindowAndRenderer(
         640,
         480,
         sdl.SDL_WINDOW_RESIZABLE | sdl.SDL_WINDOW_ALLOW_HIGHDPI,
         &window,
         &renderer,
-    ) != 0) {
-        sdl.SDL_Log("Unable to create window and renderer: %s", sdl.SDL_GetError());
-        return error.SDLInitializationFailed;
-    }
+    );
     defer sdl.SDL_DestroyWindow(window);
 
     // const image_file = @embedFile("zero.png");
@@ -56,26 +50,17 @@ if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO | sdl.SDL_INIT_AUDIO) != 0) {
 
     // var rect: sdl.SDL_Rect = .{ .w = width, .h = height, .x = 0, .y = 0 };
 
-    if (sdl.TTF_Init() != 0) {
-        sdl.SDL_Log("Unable to initialize SDL2_ttf: %s", sdl.TTF_GetError());
-        return error.SDLInitializationFailed;
-    }
+    _ = sdl.TTF_Init();
     defer sdl.TTF_Quit();
 
     const font_file = @embedFile("Sans.ttf");
     const font_rw = sdl.SDL_RWFromConstMem(
         @ptrCast(*const anyopaque, &font_file[0]),
         @intCast(c_int, font_file.len),
-    ) orelse {
-        sdl.SDL_Log("Unable to get RWFromConstMem: %s", sdl.SDL_GetError());
-        return error.SDLInitializationFailed;
-    };
+    );
     defer std.debug.assert(sdl.SDL_RWclose(font_rw) == 0);
 
-    const font = sdl.TTF_OpenFontRW(font_rw, 0, 16) orelse {
-        sdl.SDL_Log("Unable to load font: %s", sdl.TTF_GetError());
-        return error.SDLInitializationFailed;
-    };
+    const font = sdl.TTF_OpenFontRW(font_rw, 0, 16);
     defer sdl.TTF_CloseFont(font);
 
     const font_surface = sdl.TTF_RenderUTF8_Blended(
@@ -87,16 +72,10 @@ if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO | sdl.SDL_INIT_AUDIO) != 0) {
             .b = 0xFF,
             .a = 0xFF,
         },
-    ) orelse {
-        sdl.SDL_Log("Unable to render text: %s", sdl.TTF_GetError());
-        return error.SDLInitializationFailed;
-    };
+    );
     defer sdl.SDL_FreeSurface(font_surface);
 
-    const font_tex = sdl.SDL_CreateTextureFromSurface(renderer, font_surface) orelse {
-        sdl.SDL_Log("Unable to create texture: %s", sdl.SDL_GetError());
-        return error.SDLInitializationFailed;
-    };
+    const font_tex = sdl.SDL_CreateTextureFromSurface(renderer, font_surface);
     defer sdl.SDL_DestroyTexture(font_tex);
 
     var font_rect: sdl.SDL_Rect = .{
@@ -106,11 +85,8 @@ if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO | sdl.SDL_INIT_AUDIO) != 0) {
         .y = 0,
     };
 
-    var before_key: bool = false;
-    var current_key: bool = false;
 
     mainloop: while (true) {
-        current_key = false;
         var event: sdl.SDL_Event = undefined;
         while (sdl.SDL_PollEvent(&event) != 0) {
             switch (event.type) {
@@ -118,9 +94,7 @@ if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO | sdl.SDL_INIT_AUDIO) != 0) {
                     break :mainloop;
                 },
                 sdl.SDL_KEYDOWN => {
-                    if (event.key.keysym.sym == sdl.SDLK_RETURN) {
-                        current_key = true;
-                    }
+                    
                 },
                 else => {},
             }
@@ -144,9 +118,5 @@ if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO | sdl.SDL_INIT_AUDIO) != 0) {
         _ = sdl.SDL_RenderPresent(renderer);
 
         sdl.SDL_Delay(1000 / 60);
-        before_key = current_key;
     }
-
-    std.debug.print("May {s} be with you", .{"the SDL"});
 }
-
