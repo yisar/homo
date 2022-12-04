@@ -45,7 +45,13 @@ pub fn build(b: *std.build.Builder) void {
     exe.addIncludePath(sdl_path ++ "include");
     exe.addLibraryPath(sdl_path ++ "lib\\x64");
     b.installBinFile(sdl_path ++ "lib\\x64\\SDL2.dll", "SDL2.dll");
+    b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_image.dll", "SDL2_image.dll");
+    b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_ttf.dll", "SDL2_ttf.dll");
+    b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_mixer.dll", "SDL2_mixer.dll");
     exe.linkSystemLibrary("sdl2");
+    exe.linkSystemLibrary("sdl2_image");
+    exe.linkSystemLibrary("sdl2_ttf");
+    exe.linkSystemLibrary("sdl2_mixer");
     exe.linkLibC();
 
     const run_cmd = exe.run();

@@ -1,49 +1,69 @@
 const std = @import("std");
 const sdl = @cImport({
     @cInclude("SDL.h");
+    @cInclude("SDL_image.h");
+    @cInclude("SDL_mixer.h");
+    @cInclude("SDL_ttf.h");
 });
+
+const assert = @import("std").debug.assert;
 
 pub usingnamespace sdl;
 
 pub fn runsdl() anyerror!void {
-    _ = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
+    if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO) != 0) {
+        sdl.SDL_Log("Unable to initialize SDL: %s", sdl.SDL_GetError());
+        return error.SDLInitializationFailed;
+    }
     defer sdl.SDL_Quit();
 
-    var window = sdl.SDL_CreateWindow("hello gamedev", sdl.SDL_WINDOWPOS_CENTERED, sdl.SDL_WINDOWPOS_CENTERED, 640, 400, 0);
-    defer sdl.SDL_DestroyWindow(window);
+    const screen = sdl.SDL_CreateWindow("Homo", sdl.SDL_WINDOWPOS_UNDEFINED, sdl.SDL_WINDOWPOS_UNDEFINED, 300, 73, sdl.SDL_WINDOW_OPENGL) orelse {
+        sdl.SDL_Log("Unable to create window: %s", sdl.SDL_GetError());
+        return error.SDLInitializationFailed;
+    };
+    defer sdl.SDL_DestroyWindow(screen);
 
-    var renderer = sdl.SDL_CreateRenderer(window, 0, sdl.SDL_RENDERER_PRESENTVSYNC);
+    const renderer = sdl.SDL_CreateRenderer(screen, -1, 0) orelse {
+        sdl.SDL_Log("Unable to create renderer: %s", sdl.SDL_GetError());
+        return error.SDLInitializationFailed;
+    };
     defer sdl.SDL_DestroyRenderer(renderer);
 
-    var frame: usize = 0;
-    mainloop: while (true) {
-        var sdl_event: sdl.SDL_Event = undefined;
-        while (sdl.SDL_PollEvent(&sdl_event) != 0) {
-            switch (sdl_event.type) {
-                sdl.SDL_QUIT => break :mainloop,
+    const zig_bmp = @embedFile("zig.bmp");
+    const rw = sdl.SDL_RWFromConstMem(zig_bmp, zig_bmp.len) orelse {
+        sdl.SDL_Log("Unable to get RWFromConstMem: %s", sdl.SDL_GetError());
+        return error.SDLInitializationFailed;
+    };
+    defer assert(sdl.SDL_RWclose(rw) == 0);
+
+    const zig_surface = sdl.SDL_LoadBMP_RW(rw, 0) orelse {
+        sdl.SDL_Log("Unable to load bmp: %s", sdl.SDL_GetError());
+        return error.SDLInitializationFailed;
+    };
+    defer sdl.SDL_FreeSurface(zig_surface);
+
+    const zig_texture = sdl.SDL_CreateTextureFromSurface(renderer, zig_surface) orelse {
+        sdl.SDL_Log("Unable to create texture from surface: %s", sdl.SDL_GetError());
+        return error.SDLInitializationFailed;
+    };
+    defer sdl.SDL_DestroyTexture(zig_texture);
+
+    var quit = false;
+    while (!quit) {
+        var event: sdl.SDL_Event = undefined;
+        while (sdl.SDL_PollEvent(&event) != 0) {
+            switch (event.type) {
+                sdl.SDL_QUIT => {
+                    quit = true;
+                },
                 else => {},
             }
         }
 
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
         _ = sdl.SDL_RenderClear(renderer);
-        var rect = sdl.SDL_Rect{ .x = 0, .y = 0, .w = 60, .h = 60 };
-        const a = 0.06 * @intToFloat(f32, frame);
-        const t = 2 * std.math.pi / 3.0;
-        const r = 100 * @cos(0.1 * a);
-        rect.x = 290 + @floatToInt(i32, r * @cos(a));
-        rect.y = 170 + @floatToInt(i32, r * @sin(a));
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0xff, 0, 0, 0xff);
-        _ = sdl.SDL_RenderFillRect(renderer, &rect);
-        rect.x = 290 + @floatToInt(i32, r * @cos(a + t));
-        rect.y = 170 + @floatToInt(i32, r * @sin(a + t));
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0, 0xff, 0, 0xff);
-        _ = sdl.SDL_RenderFillRect(renderer, &rect);
-        rect.x = 290 + @floatToInt(i32, r * @cos(a + 2 * t));
-        rect.y = 170 + @floatToInt(i32, r * @sin(a + 2 * t));
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0, 0, 0xff, 0xff);
-        _ = sdl.SDL_RenderFillRect(renderer, &rect);
+        _ = sdl.SDL_RenderCopy(renderer, zig_texture, null, null);
         sdl.SDL_RenderPresent(renderer);
-        frame += 1;
+
+        sdl.SDL_Delay(17);
     }
 }
