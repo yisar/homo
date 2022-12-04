@@ -4,12 +4,14 @@ const print = std.debug.print;
 
 const qjs = @import("./qjs.zig");
 
-const MAX_FILE_SIZE: usize = 100 * 1024 * 1024;
+const MAX_FILE_SIZE: usize = 1024 * 1024;
 
 const fs = std.fs;
 const mem = std.mem;
 
-fn greet(js_ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, _: [*c]qjs.JSValue) callconv(.C) qjs.JSValue {
+fn greet(js_ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, args: [*c]qjs.JSValue) callconv(.C) qjs.JSValue {
+    var res = qjs.JS_ToCString(js_ctx,args[0]);
+    print("result is {s}\n\n", .{res});
     return qjs.JS_NewInt64(js_ctx, 123);
 }
 
@@ -57,7 +59,7 @@ pub fn main() !void {
 
         var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
 
-        var greetfn: qjs.JSValue = qjs.JS_NewCFunction(js_context, greet, "greet", 0);
+        var greetfn: qjs.JSValue = qjs.JS_NewCFunction(js_context, greet, "greet", 1);
         defer qjs.JS_FreeValue(js_context, global);
         _ = qjs.JS_SetPropertyStr(js_context, global, "greet", greetfn);
 

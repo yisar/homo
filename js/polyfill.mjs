@@ -71,7 +71,7 @@ export function polyfill() {
         let prop = TO_SANITIZE[j];
         mutation[prop] = sanitize(mutation[prop]);
       }
-      console.log(JSON.stringify(mutation, null, 2));
+      this.greet(JSON.stringify(mutation));
     }
   }).observe(document, { subtree: true });
 }
