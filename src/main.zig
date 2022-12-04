@@ -4,7 +4,7 @@ const print = std.debug.print;
 
 const qjs = @import("./qjs.zig");
 
-const MAX_FILE_SIZE: usize = 4 * 1024 * 1024;
+const MAX_FILE_SIZE: usize = 100 * 1024 * 1024;
 
 const fs = std.fs;
 const mem = std.mem;
