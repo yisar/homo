@@ -40,6 +40,14 @@ pub fn build(b: *std.build.Builder) void {
         exe.addObjectFile("clib/mingw-w64-winpthreads/lib/libpthread.a");
     }
 
+    // init sdl
+    const sdl_path = "D:\\SDL2-2.0.14\\";
+    exe.addIncludePath(sdl_path ++ "include");
+    exe.addLibraryPath(sdl_path ++ "lib\\x64");
+    b.installBinFile(sdl_path ++ "lib\\x64\\SDL2.dll", "SDL2.dll");
+    exe.linkSystemLibrary("sdl2");
+    exe.linkLibC();
+
     const run_cmd = exe.run();
     run_cmd.step.dependOn(b.getInstallStep());
     if (b.args) |args| {

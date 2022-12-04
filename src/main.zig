@@ -1,6 +1,7 @@
 const std = @import("std");
 
 const print = std.debug.print;
+const sld = @import("./sdl.zig");
 
 const qjs = @import("./qjs.zig");
 const MAX_FILE_SIZE: usize = 1024 * 1024;
@@ -17,5 +18,6 @@ pub fn main() !void {
     defer allocator.free(src);
 
     try qjs.runSyncLoop(allocator, src);
+    try sld.runsdl();
 
 }
