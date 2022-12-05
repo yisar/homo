@@ -14,7 +14,7 @@ pub fn evalFile(allocator: std.mem.Allocator, src: []u8) ![]u8 {
     return srcs;
 }
 
-pub fn runSyncLoop(allocator: std.mem.Allocator, src: []u8) !void {
+pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
     const js_src = try qjs.evalFile(allocator, src);
 
     const load_std = "import * as std from 'std';import * as os from 'os';globalThis.std = std;globalThis.os = os;";

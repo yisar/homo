@@ -18,7 +18,8 @@ pub fn send(js_ctx: ?*qjs.JSContext, _: qjs.JSValue, _: c_int, args: [*c]qjs.JSV
     };
 
     var a = tree.root.Object.get("addedNodes").?;
-    print("{}\n", .{a});
+    
+    drawFont("hello Fre", 30, 30);
 
     return qjs.JS_NewInt64(js_ctx, 123);
 }
