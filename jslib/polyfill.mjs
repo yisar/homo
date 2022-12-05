@@ -57,6 +57,9 @@ function sanitize(obj) {
 export function polyfill() {
   this.document = dom();
   this.setTimeout = (cb) => cb();
+  this.getRenderQueue = function(){
+    return JSON.stringify("{type:\"text\",data:\"hello fre!\"}")
+  }
   this.performance = Date;
   for (let i in document.defaultView) {
     if (document.defaultView.hasOwnProperty(i)) {

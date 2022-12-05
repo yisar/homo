@@ -5,7 +5,7 @@
   "main": "dom.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "buildjs":"node ./js/build.mjs"
+    "buildjs":"node ./jslib/build.mjs"
   },
   "keywords": [],
   "author": "",

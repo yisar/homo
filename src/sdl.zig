@@ -8,7 +8,7 @@ const sdl = @cImport({
 const assert = @import("std").debug.assert;
 const text = @import("./component/text.zig");
 const print = std.debug.print;
-const jsapi = @import("./jsapi.zig");
+const qjs = @import("./qjs.zig");
 
 pub usingnamespace sdl;
 
@@ -36,9 +36,6 @@ pub fn runsdl() anyerror!void {
                     break :mainloop;
                 },
                 sdl.SDL_KEYDOWN => {},
-                jsapi.myEventType=>{
-                    print("{}",.{111});
-                },
                 else => {},
             }
         }

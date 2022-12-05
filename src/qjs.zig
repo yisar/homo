@@ -14,6 +14,8 @@ pub fn evalFile(allocator: std.mem.Allocator, src: []u8) ![]u8 {
     return srcs;
 }
 
+var js_ctx: ?*qjs.JSContext = undefined;
+
 pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
     const js_src = try qjs.evalFile(allocator, src);
 
@@ -22,34 +24,49 @@ pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
     var js_runtime: *qjs.JSRuntime = qjs.JS_NewRuntime().?;
     defer qjs.JS_FreeRuntime(js_runtime);
 
-    var js_context = qjs.JS_NewContext(js_runtime);
-    defer qjs.JS_FreeContext(js_context);
+    js_ctx = qjs.JS_NewContext(js_runtime);
+    defer qjs.JS_FreeContext(js_ctx);
 
-    _ = qjs.js_init_module_std(js_context, "std");
-    _ = qjs.js_init_module_os(js_context, "os");
+    _ = qjs.js_init_module_std(js_ctx, "std");
+    _ = qjs.js_init_module_os(js_ctx, "os");
 
     qjs.js_std_init_handlers(js_runtime);
     defer qjs.js_std_free_handlers(js_runtime);
 
     qjs.JS_SetModuleLoaderFunc(js_runtime, null, qjs.js_module_loader, null);
 
-    qjs.js_std_add_helpers(js_context, 0, null);
+    qjs.js_std_add_helpers(js_ctx, 0, null);
 
-    var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_context);
+    var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_ctx);
 
-    var sendfn: qjs.JSValue = qjs.JS_NewCFunction(js_context, jsapi.send, "send", 1);
-    defer qjs.JS_FreeValue(js_context, global);
-    _ = qjs.JS_SetPropertyStr(js_context, global, "send", sendfn);
+    var sendfn: qjs.JSValue = qjs.JS_NewCFunction(js_ctx, jsapi.send, "send", 1);
+    defer qjs.JS_FreeValue(js_ctx, global);
+    _ = qjs.JS_SetPropertyStr(js_ctx, global, "send", sendfn);
 
-    const val = qjs.JS_Eval(js_context, load_std, load_std.len, "<input>", qjs.JS_EVAL_TYPE_MODULE);
+    const val = qjs.JS_Eval(js_ctx, load_std, load_std.len, "<input>", qjs.JS_EVAL_TYPE_MODULE);
     if (qjs.JS_IsException(val) > 0) {
-        qjs.js_std_dump_error(js_context);
+        qjs.js_std_dump_error(js_ctx);
     }
 
-    const val2 = qjs.JS_Eval(js_context, js_src.ptr, js_src.len - 1, "<file>", qjs.JS_EVAL_TYPE_GLOBAL);
+    const val2 = qjs.JS_Eval(js_ctx, js_src.ptr, js_src.len - 1, "<file>", qjs.JS_EVAL_TYPE_GLOBAL);
     if (qjs.JS_IsException(val2) > 0) {
-        qjs.js_std_dump_error(js_context);
+        qjs.js_std_dump_error(js_ctx);
     }
 
-    qjs.js_std_loop(js_context);
+    qjs.js_std_loop(js_ctx);
+
+    qjs.js_call();
+}
+
+pub fn js_call() void {
+    var global = qjs.JS_GetGlobalObject(js_ctx);
+    defer qjs.JS_FreeValue(js_ctx, global);
+    var func = qjs.JS_GetPropertyStr(js_ctx, global, "getRenderQueue");
+    defer qjs.JS_FreeValue(js_ctx, func);
+
+    var arr = [_]qjs.JSValue{};
+    var res = qjs.JS_Call(js_ctx, func, global, 0, &arr);
+    defer qjs.JS_FreeValue(js_ctx, res);
+
+    std.debug.print("{}", .{res});
 }
