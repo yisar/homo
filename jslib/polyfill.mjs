@@ -67,7 +67,7 @@ export function polyfill() {
       });
       return ret;
     }else{
-      return null;
+      return null
     }
   };
   this.performance = Date;

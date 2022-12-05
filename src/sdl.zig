@@ -9,6 +9,7 @@ const assert = @import("std").debug.assert;
 const text = @import("./component/text.zig");
 const print = std.debug.print;
 const qjs = @import("./qjs.zig");
+const r = @import("./render.zig");
 
 pub usingnamespace sdl;
 
@@ -43,8 +44,11 @@ pub fn runsdl() anyerror!void {
         _ = sdl.SDL_SetRenderDrawColor(renderer, 0x94, 0x6c, 0xe6, 0xFF);
         _ = sdl.SDL_RenderClear(renderer);
 
-        sdl.SDL_Delay(1000);
-        var ret = qjs.js_call();
-        print("{s}", .{ret});
+        sdl.SDL_Delay(1000/60);
+        var direct = qjs.js_call("getRenderQueue");
+        if (!std.mem.eql(u8, direct, "null")) {
+           try r.render(direct); 
+        }
+        
     }
 }

@@ -56,14 +56,12 @@ pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
 
     qjs.js_std_loop(js_ctx);
     try sdl.runsdl();
-
-
 }
 
-pub fn js_call() []const u8 {
+pub fn js_call(fnname: []const u8) []const u8 {
     var global = qjs.JS_GetGlobalObject(js_ctx);
     defer qjs.JS_FreeValue(js_ctx, global);
-    var func = qjs.JS_GetPropertyStr(js_ctx, global, "getRenderQueue");
+    var func = qjs.JS_GetPropertyStr(js_ctx, global, fnname.ptr);
     defer qjs.JS_FreeValue(js_ctx, func);
 
     var arr = [_]qjs.JSValue{};
@@ -71,8 +69,7 @@ pub fn js_call() []const u8 {
     // defer qjs.JS_FreeValue(js_ctx, val);
 
     var j = qjs.JS_ToCString(js_ctx, val);
-    
-        var ret = std.mem.span(j);
-        return ret;
-    
+
+    var ret = std.mem.span(j);
+    return ret;
 }
