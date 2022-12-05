@@ -16,7 +16,6 @@ pub fn main() !void {
     const src = try fs.cwd().readFileAlloc(allocator, file, 1024 * 1024);
     defer allocator.free(src);
     try qjs.runMicrotask(allocator, src);
-    try sld.runsdl();
     
 
 }

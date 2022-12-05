@@ -43,6 +43,8 @@ pub fn runsdl() anyerror!void {
         _ = sdl.SDL_SetRenderDrawColor(renderer, 0x94, 0x6c, 0xe6, 0xFF);
         _ = sdl.SDL_RenderClear(renderer);
 
-        sdl.SDL_Delay(1000 / 60);
+        sdl.SDL_Delay(1000);
+        var ret = qjs.js_call();
+        print("{s}", .{ret});
     }
 }

@@ -1,4 +1,5 @@
 import { dom } from "./dom.mjs";
+const pendingQueue = [];
 
 let COUNTER = 0;
 
@@ -57,9 +58,18 @@ function sanitize(obj) {
 export function polyfill() {
   this.document = dom();
   this.setTimeout = (cb) => cb();
-  this.getRenderQueue = function(){
-    return JSON.stringify("{type:\"text\",data:\"hello fre!\"}")
-  }
+  this.getRenderQueue = function () {
+    const direct = pendingQueue.pop();
+    if (direct != null) {
+      const ret = JSON.stringify({
+        type: direct.addedNodes.nodeName,
+        data: direct.addedNodes.data || "",
+      });
+      return ret;
+    }else{
+      return null;
+    }
+  };
   this.performance = Date;
   for (let i in document.defaultView) {
     if (document.defaultView.hasOwnProperty(i)) {
@@ -74,7 +84,7 @@ export function polyfill() {
         let prop = TO_SANITIZE[j];
         mutation[prop] = sanitize(mutation[prop]);
       }
-      this.send(JSON.stringify(mutation));
+      pendingQueue.push(mutation);
     }
   }).observe(document, { subtree: true });
 }

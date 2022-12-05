@@ -1,5 +1,6 @@
 const std = @import("std");
 const jsapi = @import("./jsapi.zig");
+const sdl = @import("./sdl.zig");
 const qjs = @This();
 
 pub usingnamespace @cImport({
@@ -14,7 +15,7 @@ pub fn evalFile(allocator: std.mem.Allocator, src: []u8) ![]u8 {
     return srcs;
 }
 
-var js_ctx: ?*qjs.JSContext = undefined;
+var js_ctx: ?*qjs.JSContext = null;
 
 pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
     const js_src = try qjs.evalFile(allocator, src);
@@ -54,19 +55,24 @@ pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
     }
 
     qjs.js_std_loop(js_ctx);
+    try sdl.runsdl();
 
-    qjs.js_call();
+
 }
 
-pub fn js_call() void {
+pub fn js_call() []const u8 {
     var global = qjs.JS_GetGlobalObject(js_ctx);
     defer qjs.JS_FreeValue(js_ctx, global);
     var func = qjs.JS_GetPropertyStr(js_ctx, global, "getRenderQueue");
     defer qjs.JS_FreeValue(js_ctx, func);
 
     var arr = [_]qjs.JSValue{};
-    var res = qjs.JS_Call(js_ctx, func, global, 0, &arr);
-    defer qjs.JS_FreeValue(js_ctx, res);
+    var val = qjs.JS_Call(js_ctx, func, global, 0, &arr);
+    // defer qjs.JS_FreeValue(js_ctx, val);
 
-    std.debug.print("{}", .{res});
+    var j = qjs.JS_ToCString(js_ctx, val);
+    
+        var ret = std.mem.span(j);
+        return ret;
+    
 }
