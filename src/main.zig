@@ -16,8 +16,6 @@ pub fn main() !void {
     const file = mem.span(argIter.next()) orelse return error.InvalidSource;
     const src = try fs.cwd().readFileAlloc(allocator, file, MAX_FILE_SIZE);
     defer allocator.free(src);
-
     try qjs.runMicrotask(allocator, src);
     try sld.runsdl();
-
 }

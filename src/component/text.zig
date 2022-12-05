@@ -1,9 +1,12 @@
 const std = @import("std");
 const sdl = @import("../sdl.zig");
-var window = @import("../sdl.zig");
-var renderer = @import("../sdl.zig");
 
-fn drawFont(text: []u8, x: i32, y: i32) void {
+const print = std.debug.print;
+
+pub fn drawFont(text: []const u8, x: i32, y: i32) void {
+    _ = sdl.TTF_Init();
+    defer sdl.TTF_Quit();
+
     const font_file = @embedFile("../asset/Sans.ttf");
     const font_rw = sdl.SDL_RWFromConstMem(
         @ptrCast(*const anyopaque, &font_file[0]),
@@ -16,7 +19,7 @@ fn drawFont(text: []u8, x: i32, y: i32) void {
 
     const font_surface = sdl.TTF_RenderUTF8_Blended(
         font,
-        text,
+        text.ptr,
         sdl.SDL_Color{
             .r = 0xFF,
             .g = 0xFF,
@@ -26,7 +29,7 @@ fn drawFont(text: []u8, x: i32, y: i32) void {
     );
     defer sdl.SDL_FreeSurface(font_surface);
 
-    const font_tex = sdl.SDL_CreateTextureFromSurface(renderer, font_surface);
+    const font_tex = sdl.SDL_CreateTextureFromSurface(sdl.renderer, font_surface);
     defer sdl.SDL_DestroyTexture(font_tex);
 
     var font_rect: sdl.SDL_Rect = .{
@@ -39,7 +42,8 @@ fn drawFont(text: []u8, x: i32, y: i32) void {
     font_rect.x = x;
     font_rect.y = y;
 
-    _ = sdl.SDL_RenderCopy(renderer, font_tex, null, &font_rect);
+    _ = sdl.SDL_RenderCopy(sdl.renderer, font_tex, null, &font_rect);
 
-    _ = sdl.SDL_RenderPresent(renderer);
+    _ = sdl.SDL_RenderPresent(sdl.renderer);
+
 }

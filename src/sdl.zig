@@ -2,11 +2,13 @@ const std = @import("std");
 const sdl = @cImport({
     @cInclude("SDL.h");
     @cInclude("SDL_image.h");
-    @cInclude("SDL_mixer.h");
     @cInclude("SDL_ttf.h");
 });
 
 const assert = @import("std").debug.assert;
+const text = @import("./component/text.zig");
+const print = std.debug.print;
+const jsapi = @import("./jsapi.zig");
 
 pub usingnamespace sdl;
 
@@ -26,9 +28,6 @@ pub fn runsdl() anyerror!void {
     );
     defer sdl.SDL_DestroyWindow(window);
 
-    _ = sdl.TTF_Init();
-    defer sdl.TTF_Quit();
-
     mainloop: while (true) {
         var event: sdl.SDL_Event = undefined;
         while (sdl.SDL_PollEvent(&event) != 0) {
@@ -37,6 +36,9 @@ pub fn runsdl() anyerror!void {
                     break :mainloop;
                 },
                 sdl.SDL_KEYDOWN => {},
+                jsapi.myEventType=>{
+                    print("{}",.{111});
+                },
                 else => {},
             }
         }
