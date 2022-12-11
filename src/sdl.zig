@@ -32,12 +32,12 @@ pub fn runsdl() anyerror!void {
     _ = sdl.SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     _ = sdl.SDL_RenderClear(renderer);
 
-    mainloop: while (true) {
+    eventloop: while (true) {
         var event: sdl.SDL_Event = undefined;
         while (sdl.SDL_PollEvent(&event) != 0) {
             switch (event.type) {
                 sdl.SDL_QUIT => {
-                    break :mainloop;
+                    break :eventloop;
                 },
                 sdl.SDL_KEYDOWN => {},
                 else => {},
