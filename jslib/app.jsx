@@ -1,4 +1,4 @@
 import { render, h } from "fre";
 import { polyfill } from "./polyfill.mjs";
 polyfill();
-render(<div style={{height:10}}>hello world!</div>, document.body);
+render(<view style={{height:100, width:100}}>hello world!</view>, document.body);

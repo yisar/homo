@@ -29,6 +29,9 @@ pub fn runsdl() anyerror!void {
     );
     defer sdl.SDL_DestroyWindow(window);
 
+    _ = sdl.SDL_SetRenderDrawColor(renderer, 0x94, 0x6c, 0xe6, 0xFF);
+    _ = sdl.SDL_RenderClear(renderer);
+
     mainloop: while (true) {
         var event: sdl.SDL_Event = undefined;
         while (sdl.SDL_PollEvent(&event) != 0) {
@@ -41,14 +44,11 @@ pub fn runsdl() anyerror!void {
             }
         }
 
-        _ = sdl.SDL_SetRenderDrawColor(renderer, 0x94, 0x6c, 0xe6, 0xFF);
-        _ = sdl.SDL_RenderClear(renderer);
-
-        sdl.SDL_Delay(1000/60);
         var direct = qjs.js_call("getRenderQueue");
         if (!std.mem.eql(u8, direct, "null")) {
-           try r.render(direct); 
-        }
-        
+            try r.render(direct);
+        } else {}
+
+        sdl.SDL_Delay(1000 / 60);
     }
 }

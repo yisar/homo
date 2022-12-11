@@ -44,5 +44,4 @@ pub fn drawFont(text: []const u8, x: i32, y: i32) void {
 
     _ = sdl.SDL_RenderCopy(sdl.renderer, font_tex, null, &font_rect);
 
-    _ = sdl.SDL_RenderPresent(sdl.renderer);
 }

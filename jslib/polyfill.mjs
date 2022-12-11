@@ -59,14 +59,19 @@ export function polyfill() {
   this.document = dom();
   this.setTimeout = (cb) => cb();
   this.getRenderQueue = function () {
-    const direct = pendingQueue.pop();
-    if (direct != null) {
+    const direct = pendingQueue.shift();
+    if (direct) {
       const ret = JSON.stringify({
         type: direct.addedNodes.nodeName,
         data: direct.addedNodes.data || "",
+        x: direct.addedNodes.style.x || "0",
+        y: direct.addedNodes.style.y || "0",
+        h: direct.addedNodes.style.height ? direct.addedNodes.style.height.toString() : "0",
+        w: direct.addedNodes.style.width ? direct.addedNodes.style.width.toString() : "0",
       });
+      console.log(ret)
       return ret;
-    }else{
+    } else {
       return null
     }
   };
@@ -78,9 +83,9 @@ export function polyfill() {
   }
 
   new MutationObserver((mutations) => {
-    for (let i = mutations.length; i--; ) {
+    for (let i = mutations.length; i--;) {
       let mutation = mutations[i];
-      for (let j = TO_SANITIZE.length; j--; ) {
+      for (let j = TO_SANITIZE.length; j--;) {
         let prop = TO_SANITIZE[j];
         mutation[prop] = sanitize(mutation[prop]);
       }
