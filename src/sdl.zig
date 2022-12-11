@@ -29,7 +29,7 @@ pub fn runsdl() anyerror!void {
     );
     defer sdl.SDL_DestroyWindow(window);
 
-    _ = sdl.SDL_SetRenderDrawColor(renderer, 0x94, 0x6c, 0xe6, 0xFF);
+    _ = sdl.SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     _ = sdl.SDL_RenderClear(renderer);
 
     mainloop: while (true) {
