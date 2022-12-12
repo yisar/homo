@@ -194,7 +194,7 @@ export function dom() {
     record.target = target.__id; // 这里暂时只保留 id
     record.type = type;
 
-    flexLayout(target)
+    flexLayout(target) 
 
     for (let i = observers.length; i--; ) {
       let ob = observers[i],

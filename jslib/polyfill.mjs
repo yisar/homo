@@ -64,10 +64,10 @@ export function polyfill() {
       const ret = JSON.stringify({
         type: direct.addedNodes.nodeName,
         data: direct.addedNodes.data || "",
-        x: direct.addedNodes.style.x || "0",
-        y: direct.addedNodes.style.y || "0",
-        h: direct.addedNodes.style.height ? direct.addedNodes.style.height.toString() : "0",
-        w: direct.addedNodes.style.width ? direct.addedNodes.style.width.toString() : "0",
+        x: direct.addedNodes.rect[0],
+        y: direct.addedNodes.rect[1],
+        h: direct.addedNodes.rect[2],
+        w: direct.addedNodes.rect[3],
       });
       console.log(ret)
       return ret;
