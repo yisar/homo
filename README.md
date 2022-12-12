@@ -35,6 +35,10 @@ render(<App />, document.body)
 zig build
  ./zig-out/bin/fre.exe dist/app.js  
 ```
+![DEMO](https://ttfou.com/images/2022/12/12/185805cbd07ce81705e287ea45a09cb8.png)
 
 ### 说人话
 
+这是一个小型渲染引擎，它和鸿蒙、flutter等拥有类似的架构，只不过使用 quickjs 和 fre 而已
+
+这也是我的一个承诺
