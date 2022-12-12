@@ -2,5 +2,5 @@
 
 ```js
 zig build
- ./zig-out/bin/fre.exe hello.js  
+ ./zig-out/bin/fre.exe dist/app.js  
 ```

@@ -1,3 +1,0 @@
-this.hello = () => {
-    return "world"
-}

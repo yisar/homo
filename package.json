@@ -1,11 +1,13 @@
 {
-  "name": "js",
-  "version": "1.0.0",
+  "name": "homo",
+  "version": "0.0.0",
   "description": "",
   "main": "dom.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "buildjs":"node ./jslib/build.mjs"
+    "build-js": "node ./jslib/build.mjs",
+    "build-zig": "zig build",
+    "build": "pnpm run build-js&&pnpm run build-zig"
   },
   "keywords": [],
   "author": "",

@@ -1,3 +1,5 @@
+import {h} from 'fre'
+
 import { dom } from "./dom.mjs";
 const pendingQueue = [];
 
@@ -21,7 +23,7 @@ const PROP_BLACKLIST = [
 
 const NODES = new Map();
 
-export function getNode(node) {
+function getNode(node) {
   let id;
   if (node && typeof node === "object") id = node.__id;
   if (typeof node === "string") id = node;
@@ -55,7 +57,7 @@ function sanitize(obj) {
   return out;
 }
 
-export function polyfill() {
+function polyfill() {
   this.document = dom();
   this.setTimeout = (cb) => cb();
   this.getRenderQueue = function () {
@@ -64,12 +66,11 @@ export function polyfill() {
       const ret = JSON.stringify({
         type: direct.addedNodes.nodeName,
         data: direct.addedNodes.data || "",
-        x: direct.addedNodes.rect[0],
-        y: direct.addedNodes.rect[1],
-        h: direct.addedNodes.rect[2],
-        w: direct.addedNodes.rect[3],
+        x: direct.addedNodes.rect[0].toString(),
+        y: direct.addedNodes.rect[1].toString(),
+        h: direct.addedNodes.rect[2].toString(),
+        w: direct.addedNodes.rect[3].toString(),
       });
-      console.log(ret)
       return ret;
     } else {
       return null
@@ -93,3 +94,7 @@ export function polyfill() {
     }
   }).observe(document, { subtree: true });
 }
+
+polyfill()
+
+export {h}
