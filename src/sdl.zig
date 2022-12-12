@@ -40,9 +40,9 @@ pub fn runsdl() anyerror!void {
                     break :eventloop;
                 },
                 sdl.SDL_KEYDOWN => {},
-                sdl.SDL_MOUSEMOTION => {
+                sdl.SDL_MOUSEBUTTONDOWN => {
                     var args = [_]qjs.JSValue{ qjs.JS_NewInt32(qjs.js_ctx, event.motion.x), qjs.JS_NewInt32(qjs.js_ctx, event.motion.y) };
-                    _ = qjs.js_call("dispatchEvent", 2, &args);
+                    _ = qjs.js_call("bubblingClick", 2, &args);
                 },
                 else => {},
             }

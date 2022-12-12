@@ -62,7 +62,7 @@ function polyfill() {
   this.setTimeout = (cb) => cb();
   this.getRenderQueue = function () {
     const direct = pendingQueue.shift();
-    if (direct) {
+    if (direct && direct.addedNodes) {
       const ret = JSON.stringify({
         type: direct.addedNodes.nodeName,
         data: direct.addedNodes.data || "",
@@ -76,11 +76,9 @@ function polyfill() {
       return null
     }
   };
-  this.dispatchEvent = (x, y) => {
+  this.bubblingClick = (x, y) => {
     console.log(x, y)
-    // const dom = findDom(x,y)
-    // dom.dispatchEvent('click')
-
+    bubbling(x, y, this.document.body, 'click')
   }
   this.performance = Date;
   for (let i in document.defaultView) {
@@ -102,5 +100,18 @@ function polyfill() {
 }
 
 polyfill()
+
+function bubbling(fx, fy, node, type) {
+
+  if (node.nodeName !== 'BODY') {
+    const [x, y, w, h] = node.rect
+    if ((fx > x && fx < x + w) && (fy > y && fy < y + h)) {
+      node.dispatchEvent({type})
+    }
+  }
+
+
+  node.childNodes.forEach(item => bubbling(fx, fy,item, type))
+}
 
 export { h }
