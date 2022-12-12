@@ -1,5 +1,5 @@
 const std = @import("std");
-const jsapi = @import("./jsapi.zig");
+const fetch = @import("./jsapi/fetch.zig");
 const sdl = @import("./sdl.zig");
 const qjs = @This();
 
@@ -15,7 +15,7 @@ pub fn evalFile(allocator: std.mem.Allocator, src: []u8) ![]u8 {
     return srcs;
 }
 
-var js_ctx: ?*qjs.JSContext = null;
+pub var js_ctx: ?*qjs.JSContext = null;
 
 pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
     const js_src = try qjs.evalFile(allocator, src);
@@ -40,9 +40,9 @@ pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
 
     var global: qjs.JSValue = qjs.JS_GetGlobalObject(js_ctx);
 
-    var sendfn: qjs.JSValue = qjs.JS_NewCFunction(js_ctx, jsapi.send, "send", 1);
+    var sendfn: qjs.JSValue = qjs.JS_NewCFunction(js_ctx, fetch.fetch, "fetch", 1);
     defer qjs.JS_FreeValue(js_ctx, global);
-    _ = qjs.JS_SetPropertyStr(js_ctx, global, "send", sendfn);
+    _ = qjs.JS_SetPropertyStr(js_ctx, global, "fetch", sendfn);
 
     const val = qjs.JS_Eval(js_ctx, load_std, load_std.len, "<input>", qjs.JS_EVAL_TYPE_MODULE);
     if (qjs.JS_IsException(val) > 0) {
@@ -58,15 +58,13 @@ pub fn runMicrotask(allocator: std.mem.Allocator, src: []u8) !void {
     try sdl.runsdl();
 }
 
-pub fn js_call(fnname: []const u8) []const u8 {
+pub fn js_call(fnname: []const u8, len: i32, args: [*c]qjs.JSValue ) []const u8 {
     var global = qjs.JS_GetGlobalObject(js_ctx);
     defer qjs.JS_FreeValue(js_ctx, global);
     var func = qjs.JS_GetPropertyStr(js_ctx, global, fnname.ptr);
     defer qjs.JS_FreeValue(js_ctx, func);
 
-    var arr = [_]qjs.JSValue{};
-    var val = qjs.JS_Call(js_ctx, func, global, 0, &arr);
-    // defer qjs.JS_FreeValue(js_ctx, val);
+    var val = qjs.JS_Call(js_ctx, func, global, len, args);
 
     var j = qjs.JS_ToCString(js_ctx, val);
 

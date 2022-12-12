@@ -1,4 +1,4 @@
-import {h} from 'fre'
+import { h } from 'fre'
 
 import { dom } from "./dom.mjs";
 const pendingQueue = [];
@@ -76,6 +76,12 @@ function polyfill() {
       return null
     }
   };
+  this.dispatchEvent = (x, y) => {
+    console.log(x, y)
+    // const dom = findDom(x,y)
+    // dom.dispatchEvent('click')
+
+  }
   this.performance = Date;
   for (let i in document.defaultView) {
     if (document.defaultView.hasOwnProperty(i)) {
@@ -97,4 +103,4 @@ function polyfill() {
 
 polyfill()
 
-export {h}
+export { h }

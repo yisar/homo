@@ -2,7 +2,6 @@ const std = @import("std");
 
 const print = std.debug.print;
 const sld = @import("./sdl.zig");
-
 const qjs = @import("./qjs.zig");
 
 const fs = std.fs;
@@ -16,6 +15,4 @@ pub fn main() !void {
     const src = try fs.cwd().readFileAlloc(allocator, file, 1024 * 1024);
     defer allocator.free(src);
     try qjs.runMicrotask(allocator, src);
-    
-
 }

@@ -40,11 +40,15 @@ pub fn runsdl() anyerror!void {
                     break :eventloop;
                 },
                 sdl.SDL_KEYDOWN => {},
+                sdl.SDL_MOUSEMOTION => {
+                    var args = [_]qjs.JSValue{ qjs.JS_NewInt32(qjs.js_ctx, event.motion.x), qjs.JS_NewInt32(qjs.js_ctx, event.motion.y) };
+                    _ = qjs.js_call("dispatchEvent", 2, &args);
+                },
                 else => {},
             }
         }
-
-        var direct = qjs.js_call("getRenderQueue");
+        var args = [_]qjs.JSValue{};
+        var direct = qjs.js_call("getRenderQueue", 0, &args);
         if (!std.mem.eql(u8, direct, "null")) {
             try r.render(direct);
         } else {}
