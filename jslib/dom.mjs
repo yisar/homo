@@ -72,7 +72,7 @@ export function dom() {
     set textContent(value) {
       let oldValue = this.data;
       this.data = value;
-      mutation(this, "characterData", { oldValue });
+      mutation(this, "characterData", { oldValue, value, rect: this.rect });
     }
     get nodeValue() {
       return this.data;

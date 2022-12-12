@@ -62,22 +62,34 @@ function polyfill() {
   this.setTimeout = (cb) => cb();
   this.getRenderQueue = function () {
     const direct = pendingQueue.shift();
-    if (direct && direct.addedNodes) {
-      const ret = JSON.stringify({
-        type: direct.addedNodes.nodeName,
-        data: direct.addedNodes.data || "",
-        x: direct.addedNodes.rect[0].toString(),
-        y: direct.addedNodes.rect[1].toString(),
-        h: direct.addedNodes.rect[2].toString(),
-        w: direct.addedNodes.rect[3].toString(),
-      });
-      return ret;
+    if (direct) {
+      if (direct.type === "characterData") {
+        const ret = JSON.stringify({
+          type: "#text",
+          data: direct.value,
+          x: direct.rect[0].toString(),
+          y: direct.rect[1].toString(),
+          h: direct.rect[2].toString(),
+          w: direct.rect[3].toString(),
+        });
+        return ret
+      }
+      if (direct.type == "childList") {
+        const ret = JSON.stringify({
+          type: direct.addedNodes.nodeName,
+          data: direct.addedNodes.data || "",
+          x: direct.addedNodes.rect[0].toString(),
+          y: direct.addedNodes.rect[1].toString(),
+          h: direct.addedNodes.rect[2].toString(),
+          w: direct.addedNodes.rect[3].toString(),
+        });
+        return ret;
+      }
     } else {
       return null
     }
   };
   this.bubblingClick = (x, y) => {
-    console.log(x, y)
     bubbling(x, y, this.document.body, 'click')
   }
   this.performance = Date;
@@ -106,12 +118,12 @@ function bubbling(fx, fy, node, type) {
   if (node.nodeName !== 'BODY') {
     const [x, y, w, h] = node.rect
     if ((fx > x && fx < x + w) && (fy > y && fy < y + h)) {
-      node.dispatchEvent({type})
+      node.dispatchEvent({ type })
     }
   }
 
 
-  node.childNodes.forEach(item => bubbling(fx, fy,item, type))
+  node.childNodes.forEach(item => bubbling(fx, fy, item, type))
 }
 
 export { h }

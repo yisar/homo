@@ -1,11 +1,10 @@
-import { render, useState} from "../node_modules/fre/dist/fre.esm.js"
+import { render, useState } from "../node_modules/fre/dist/fre.esm.js"
 
 function App() {
     const [count, setCount] = useState(0)
-    console.log(count)
-    const add = () =>{
+    const add = () => {
         console.log('u clicked a button')
-        setCount(count+1)
+        setCount(count + 1)
     }
     return (
         <view style={{ height: 100, width: 100 }} onClick={add}>

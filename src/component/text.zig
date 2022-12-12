@@ -4,6 +4,14 @@ const sdl = @import("../sdl.zig");
 const print = std.debug.print;
 
 pub fn drawFont(text: []const u8, x: i32, y: i32) void {
+    var clearrect = sdl.SDL_Rect{ .x = 0, .y = 0, .w = 0, .h = 0 };
+    clearrect.x = 0;
+    clearrect.y = 0;
+    clearrect.w = 100;
+    clearrect.h = 100;
+
+    _ = sdl.SDL_RenderFillRect(sdl.renderer, &clearrect);
+
     _ = sdl.TTF_Init();
     defer sdl.TTF_Quit();
 
