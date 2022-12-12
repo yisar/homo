@@ -1,4 +1,4 @@
-import { render, useState } from "../node_modules/fre/dist/fre.esm.js"
+import { render, useState } from "fre"
 
 function App() {
     const [count, setCount] = useState(0)
