@@ -1,7 +1,7 @@
 # Homo
 > Lightweight Rendering engine similar to Harmony, but use Fre and quickjs
 
-*It also called Fre native!*
+*It was also called Fre native!*
 
 - Javascript Runtime with [Zig](https://github.com/ziglang/zig) and [quickjs](https://github.com/bellard/quickjs)
 - UI framework use [Fre.js](https://github.com/frejs/fre)

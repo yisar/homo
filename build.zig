@@ -51,7 +51,7 @@ pub fn build(b: *std.build.Builder) void {
         .source = .{ .path = "./src/lv.zig" },
     });
 
-        const cflags = [_][]const u8{
+    const cflags = [_][]const u8{
         // TODO:
         "-DLV_HOR_RES=800",
         "-DLV_VER_RES=480",
@@ -162,7 +162,6 @@ pub fn build(b: *std.build.Builder) void {
         "clib/lvgl/src/font/lv_font_montserrat_14.c",
     };
     exe.addCSourceFiles(&lvgl_source_files, &cflags);
-
 
     // init sdl
     const sdl_path = "D:\\SDL2-2.0.14\\";
