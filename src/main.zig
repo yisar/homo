@@ -3,11 +3,13 @@ const std = @import("std");
 const print = std.debug.print;
 const sld = @import("./sdl.zig");
 const qjs = @import("./qjs.zig");
+const lv = @import("./lvgl.zig");
 
 const fs = std.fs;
 const mem = std.mem;
 
 pub fn main() !void {
+    lv.lv_init();
     const allocator = std.heap.c_allocator;
     var argIter = try std.process.argsWithAllocator(allocator);
     _ = argIter.next();

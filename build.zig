@@ -45,6 +45,7 @@ pub fn build(b: *std.build.Builder) void {
 
     exe.addIncludePath("./clib/lvgl");
     exe.addIncludePath("./clib/lv_drivers");
+    exe.addIncludePath("./clib/lv_drivers/indev");
 
     exe.addPackage(.{
         .name = "lvgl",
