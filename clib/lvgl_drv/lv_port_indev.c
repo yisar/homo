@@ -3,9 +3,9 @@
 #include "lv_port_indev.h"
 #include "lvgl.h"
 #ifdef NXDK
-#include <SDL.h>
+#include "SDL.h"
 #else
-#include <SDL2/SDL.h>
+#include "SDL.h"
 #endif
 
 static lv_indev_drv_t indev_drv_gamepad;

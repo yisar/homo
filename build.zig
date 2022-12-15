@@ -152,6 +152,12 @@ pub fn build(b: *std.build.Builder) void {
         "clib/lvgl/src/font/lv_font.c",
         "clib/lvgl/src/font/lv_font_fmt_txt.c",
         "clib/lvgl/src/font/lv_font_montserrat_14.c",
+        
+        // lvgl_drv
+        "clib/lvgl_drv/lv_sdl_disp.c",
+        "clib/lvgl_drv/lv_port_indev.c",
+        "clib/lvgl_drv/lv_xbox_disp.c",
+
     };
     exe.addCSourceFiles(&lvgl_source_files, &cflags);
 

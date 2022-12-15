@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 
 #include <assert.h>
-#include <SDL.h>
+#include "SDL.h"
 #include "lv_port_disp.h"
 #include "lvgl.h"
 
