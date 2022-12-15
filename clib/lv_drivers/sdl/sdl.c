@@ -50,7 +50,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "D:/SDL2-2.0.14/include/SDL.h"
+#include "SDL.h"
 
 /*********************
  *      DEFINES
