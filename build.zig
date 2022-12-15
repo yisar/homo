@@ -44,13 +44,7 @@ pub fn build(b: *std.build.Builder) void {
     exe.linkLibC();
 
     exe.addIncludePath("./clib/lvgl");
-    exe.addIncludePath("./clib/lv_drivers");
-    exe.addIncludePath("./clib/lv_drivers/indev");
-
-    exe.addPackage(.{
-        .name = "lvgl",
-        .source = .{ .path = "./src/lv.zig" },
-    });
+    exe.addIncludePath("./clib/lvgl_drv");
 
     const cflags = [_][]const u8{
         // TODO:
@@ -60,9 +54,6 @@ pub fn build(b: *std.build.Builder) void {
         "-DLV_CONF_INCLUDE_SIMPLE=1",
         "-fno-sanitize=all",
     };
-
-    exe.addCSourceFile("clib/lv_drivers/sdl/sdl.c", &cflags);
-    exe.addCSourceFile("clib/lv_drivers/indev/evdev.c", &cflags);
 
     const lvgl_source_files = [_][]const u8{
         // core

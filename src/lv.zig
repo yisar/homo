@@ -10,4 +10,7 @@ pub fn runLvgl() void {
     _ = lv.lv_label_set_text(label, "Hello world");
     _ = lv.lv_obj_set_style_text_color(lv.lv_scr_act(), lv.lv_color_hex(0xffffff), lv.LV_PART_MAIN);
     _ = lv.lv_obj_align(label, lv.LV_ALIGN_CENTER, 0, 0);
+
+    // var lastTick: i64 = std.time.milliTimestamp();
+    
 }
