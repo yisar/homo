@@ -5,6 +5,7 @@
 
 - Javascript Runtime with [Zig](https://github.com/ziglang/zig) and [quickjs](https://github.com/bellard/quickjs)
 - UI framework use [Fre.js](https://github.com/frejs/fre)
+- Graphics Library use [LVGL](https://github.com/lvgl/lvgl)
 - Event loop and Event bubbling
 - DOM diff and Flex layout alghrithom
 - cross-compilation with Zig
