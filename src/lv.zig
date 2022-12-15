@@ -1,4 +1,5 @@
 const lv = @import("./lvgl.zig");
+const std = @import("std");
 
 pub fn runLvgl() void {
     lv.lv_init();
@@ -15,6 +16,13 @@ pub fn runLvgl() void {
     _ = lv.lv_label_set_text(label, "Hello world");
     _ = lv.lv_obj_set_style_text_color(lv.lv_scr_act(), lv.lv_color_hex(0xffffff), lv.LV_PART_MAIN);
     _ = lv.lv_obj_align(label, lv.LV_ALIGN_CENTER, 0, 0);
+
+    var lastTick: i64 = std.time.milliTimestamp();
+    while (true) {
+        lv.lv_tick_inc(@intCast(u32, std.time.milliTimestamp() - lastTick));
+        lastTick = std.time.milliTimestamp();
+        _=lv.lv_task_handler();
+    }
 
     // var lastTick: i64 = std.time.milliTimestamp();
 
