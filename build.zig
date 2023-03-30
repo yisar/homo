@@ -162,15 +162,29 @@ pub fn build(b: *std.build.Builder) void {
     exe.addCSourceFiles(&lvgl_source_files, &cflags);
 
     // init sdl
-    const sdl_path = "D:\\SDL2-2.0.14\\";
-    exe.addIncludePath(sdl_path ++ "include");
-    exe.addLibraryPath(sdl_path ++ "lib\\x64");
-    b.installBinFile(sdl_path ++ "lib\\x64\\SDL2.dll", "SDL2.dll");
-    b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_image.dll", "SDL2_image.dll");
-    b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_ttf.dll", "SDL2_ttf.dll");
-    exe.linkSystemLibrary("sdl2");
-    exe.linkSystemLibrary("sdl2_image");
-    exe.linkSystemLibrary("sdl2_ttf");
+
+
+    if ( target.getOsTag() == .macos and
+         target.getCpuArch().isAARCH64() ) {
+
+        const homebrew_path = "/opt/homebrew";
+        exe.addIncludePath(homebrew_path ++ "/include/SDL2");
+        exe.addLibraryPath(homebrew_path ++ "/lib");
+
+        exe.linkSystemLibrary("SDL2");
+    }
+    else {
+        const sdl_path = "D:\\SDL2-2.0.14\\";
+        exe.addIncludePath(sdl_path ++ "include");
+        exe.addLibraryPath(sdl_path ++ "lib\\x64");
+        b.installBinFile(sdl_path ++ "lib\\x64\\SDL2.dll", "SDL2.dll");
+        b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_image.dll", "SDL2_image.dll");
+        b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_ttf.dll", "SDL2_ttf.dll");
+        exe.linkSystemLibrary("sdl2");
+        exe.linkSystemLibrary("sdl2_image");
+        exe.linkSystemLibrary("sdl2_ttf");
+    }
+
     exe.linkLibC();
 
     const run_cmd = exe.run();
