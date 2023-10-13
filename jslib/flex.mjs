@@ -1,142 +1,104 @@
-// soga 算法简单实现
+const empty = [0, 0, 0, 0]
+const { is } = Object
+const { max } = Math
 
-let pos1 = 0
-let pos2 = 0
-let size1 = 0
-let size2 = 0
+export function measure(obj, ddd, vxy, vwh) {
+  const { props: { style }, children } = obj
+  const direction = +(!(style.direction === 'row'))
+  const xxx = ddd
+  const yyy = +(!xxx)
 
-export function flexLayout(node) {
-    node.style = node.style || {}
+  const cxy = [0, 0, 0, 0, 0] // x/y/length/space/offset
+  const cwh = [style.width ?? -0, style.height ?? -0, 0, 0, 0] // w/h/flex/used/implict
+  const mmm = style.margin ?? empty
+  obj.returns = { xxx, cxy, cwh }
 
-    node.style = {
-        height: node.style.height || 0,
-        width: node.style.width || 0,
-        grow: node.style.grow || 0,
-        shrink: node.style.shrink || 1,
-        direction: node.style.direction || 'row',
-        wrap: node.style.wrap || 'nowrap'
+  if (style.display === 'none') {
+    return void (cwh[0] = cwh[1] = 0)
+  }
+  if ((style.position ?? 'r')[0] === 'r') {
+    vxy[2] += 1
+    vwh[2] += max(0, style.flex | 0)
+  }
+  for (let i = 0; i < children.length; ++i) {
+    measure(children[i], direction, cxy, cwh)
+  } 
+  vwh[3] += (is(cwh[xxx], -0) ? cwh[3] : cwh[xxx]) + (mmm[xxx + 0] + mmm[xxx + 2]) // implicit inline size
+  vwh[4] = max(vwh[4], (is(cwh[yyy], -0) ? cwh[4] : cwh[yyy]) + (mmm[yyy + 0] + mmm[yyy + 2])) // implicit block size
+}
+
+export function layout(obj, aaa, jjj, vxy, vwh, gpu) {
+  const { props: { style }, children, returns: { xxx, cxy, cwh } } = obj
+  const yyy = +(!xxx) // opposite of is row/column
+  const ppp = style.padding ?? empty
+  const mmm = style.margin ?? empty
+  const position = +((style.position ?? 'r')[0]==='r') // position: (r)elative*, absolute, fixed
+  const self = style.alignSelf
+  const align = style.alignItems
+
+  const justify = style.justifyContent
+
+  if (self) aaa = self
+    
+  if (justify === 'reverse') {
+    children = children.reverse() // todo
+  }
+  init: {
+    cxy[xxx] += mmm[xxx + 0] + ppp[xxx + 0] + vxy[4]
+    cxy[yyy] += mmm[yyy + 0] + ppp[yyy + 0]
+  }
+  size: {
+    cwh[3] = cwh[3] + (ppp[xxx + 0] + ppp[xxx + 2] + ((cxy[2] - 1) * max(0, style.gap ?? 0))) // used space += padding + (n * gap)
+    cwh[xxx] = is(cwh[xxx], -0) ? (!position ? cwh[3] : (vwh[xxx] - vwh[3]) * ((max(0, style.flex | 0) || 1) / vwh[2])) : cwh[xxx] // if implicit sized then size = (total space - used space) * (flex or 1)/(total flex)
+    cwh[yyy] = is(cwh[yyy], -0) ? (!position ? cwh[4] : (vwh[4] || vwh[yyy])) : cwh[yyy]
+  }
+  position: {
+    for (let [lt, rb, ww, xy, wh] of [[style.left ?? -0, style.right ?? -0, cwh[0], 0, 1], [style.top ?? -0, style.bottom ?? -0, cwh[1], 0, 1]])
+      if (!is(lt, -0) && !is(rb, -0) && is(ww, -0)) { // left, right set while width is undefined
+        cxy[xy] = (position ? cxy : vxy)[xy] + lt // node[x/y] = root[x/y] + l/t
+        cwh[wh] = vwh[wh] - lt - rb // node[w/h] = root[w/h] - l/t - r/b
+      } else if (lt != null) cxy[xy] = (position ? cxy : vxy)[xy] + lt // when only l/t, node[x/y] = root/node[x/y] + l/t dependant on absolute position
+      else if (rb != null) cxy[xy] = vxy[xy] - rb + (rel ? 0 : vwh[wh] - cwh[wh]) // when only right/bottom node[x/y] = root[x/y] - r/b + (root[w\h] - node[w\h]) ...
+      else if (!position) cxy[xy] = vxy[xy] // node[x/y] = root[x/y]
+  }
+  align: {
+    let [yx, hw] = [[1, 1], [0, 0]][xxx] 
+    if (position) switch (aaa) { 
+      case 'end':
+        cxy[yx] = vwh[hw] - cwh[hw]
+        break
+      case 'center':
+        cxy[yx] = vwh[hw] / 2 - cwh[hw] / 2
+        break // ce(n)ter
+      case 'stretch':
+        cxy[yx] = vwh[hw]
+        break
     }
-
-    let x = 0
-    let y = 0
-    let direction = node.style.direction
-    let wrap = node.style.wrap
-
-    let flex_dim = 0
-    let align_dim = 0
-    let size_dim = 0
-
-    let grows = 0
-    let shrinks = 1
-
-    switch (direction) {
-        case 'row':
-            flex_dim = node.style.width
-            size_dim = node.style.width
-            align_dim = node.style.height
-            pos1 = 0
-            pos2 = 1
-            size1 = 2
-            size2 = 3
-            break
-        case 'column':
-            flex_dim = node.style.height
-            size_dim = node.style.height
-            align_dim = node.style.width
-            pos1 = 1
-            pos2 = 0
-            size1 = 3
-            size2 = 2
-            break
-
+  }
+  justify: {
+    let [xy, wh] = [[0, 0], [1, 1]][xxx]
+    if (position) switch (jjj) {
+      case 'end':
+        cxy[xy] = vwh[wh] - cwh[wh]
+        break
+      case 'center':
+        cxy[xy] = vwh[wh] / 2 - cwh[wh] / 2
+        break // ce(n)ter given that mathematically (1 + 1 + 1)/2 is equivalent to (1/2) + (1/2) + (1/2)
+      case 'stretch':
+        cxy[xy] = vwh[wh]
+        break
     }
-    for (let i = 0; i < node.childNodes.length; i++) {
-        let child = node.childNodes[i]
-        let temp_rect = [0, 0, 0, 0]
-        let style = child.style || {
-            height: 0,
-            width: 0,
-            grow: 0,
-            shrink: 1
-        }
-        temp_rect[size1] = style.width
-        temp_rect[size2] = style.height
-
-        flex_dim -= temp_rect[size1]
-
-        grows += style.grow
-        shrinks += style.shrinks
+  }
+  draw: {
+    gpu(obj, [vxy[0] + cxy[0], vxy[1] + cxy[1]], [cwh[0], cwh[1]])
+  }
+  each: {
+    for (var i = 0; i < children.length; i++) {
+      layout(children[i], align, justify, cxy, cwh, gpu)
     }
-
-    for (let i = 0; i < node.childNodes.length; i++) {
-        let child = node.childNodes[i]
-        let style = child.style || {
-            height: 0,
-            width: 0,
-            grow: 0,
-            shrink: 1
-        }
-        let child_w = style.width
-        let child_h = style.height
-
-        let res_rect = [0, 0, 0, 0]
-
-        res_rect[size1] = child_w
-        res_rect[size2] = child_h
-
-        let size = 0
-
-        switch (wrap) {
-            case 'wrap':
-                let child_size = res_rect[size1]
-                if (child_size > size_dim) {
-                    x = 0
-                    y += res_rect[size2]
-                } else {
-                    size_dim -= child_size
-                }
-                break
-            case 'nowrap':
-                if (flex_dim > 0) {
-                    if (child.style.grow) {
-                        size += (flex_dim / grows) * style.grow;
-                    }
-                } else if (flex_dim < 0) {
-                    if (child.style.shrink) {
-                        size += (flex_dim / shrinks) * style.shrink
-                    }
-                }
-                break
-        }
-
-        if (x == 0) {
-            switch (node.style.justifyContent) {
-                case 'center':
-                    x = flex_dim / 2
-                    break
-            }
-        }
-
-        res_rect[pos1] += x
-
-        let align = y
-
-        switch (node.style.alignItems) {
-            case 'center':
-                align = (align_dim / 2) - (res_rect[size2] / 2);
-                break
-        }
-
-        res_rect[size1] += size
-        res_rect[pos2] = align
-
-
-        x += res_rect[size1]
-        y += res_rect[size2]
-
-        child.rect = res_rect
-        console.log(child.nodeName,JSON.stringify(res_rect))
-
-        flexLayout(child)
-    }
+  }
+  move: { // margin padding cursor
+    cxy[xxx] += mmm[yyy + 2] + ppp[yyy + 2] + cwh[xxx]
+    vxy[4] += cxy[xxx]
+  }
 }

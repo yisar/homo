@@ -1,0 +1,33 @@
+<script type=module defer>
+	import {measure, layout} from './flex.js';
+	function draw(node, [x, y], [w, h]) {
+		const {type, props: {style}, children} = node
+	  if (!type) { context.font = `${style.fontSize} ${style.fontFamily}`; context.fillStyle = style.color; context.fillText(children, x, y + h); }
+	  else { context.fillStyle = style.backgroundColor; context.fillRect(x, y, w, h); }
+	}
+
+	const canvas = Object.assign(document.body, {style: 'padding:0;margin:0;'}).appendChild(document.createElement('canvas'));
+	const context = globalThis.context = canvas.getContext('2d');
+	const s = () => {
+	  canvas.width = (innerWidth / 1) * (devicePixelRatio / devicePixelRatio);
+	  canvas.height = (innerHeight / 1) * (devicePixelRatio / devicePixelRatio);
+	};
+	
+	s();
+
+	const h = (style, children) => ({type: 'view', props: {style}, children: children, returns: null});
+	const r = () => {
+	  context.clearRect(0, 0, canvas.width, canvas.height);
+	  const element = h({ width: 600, height: 600, direction: 'row', backgroundColor: 'red',alignItems:'center' },
+	    [h({ flex: 1, backgroundColor: 'green', height: void (600/4), },[]),
+	    h({ flex: 2, backgroundColor: 'blue', height: (600/2), },[]),]
+	  );
+
+	  const cxy = [0, 0, 0, 0, 0];
+	  const cwh = [600, 600, 0, 0, 0];
+	  measure(element, 0, cxy, cwh);
+	  layout(element, 1, 0, cxy, cwh, draw);
+	};
+
+	r()
+</script>
