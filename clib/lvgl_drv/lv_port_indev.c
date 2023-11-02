@@ -3,10 +3,12 @@
 #include "lv_port_indev.h"
 #include "lvgl.h"
 #ifdef NXDK
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #else
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #endif
+
+// C/C++
 
 static lv_indev_drv_t indev_drv_gamepad;
 static lv_indev_drv_t indev_drv_mouse;

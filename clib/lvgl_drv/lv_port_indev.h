@@ -20,9 +20,9 @@ extern "C" {
 #include "lvgl.h"
 #include "lvgl.h"
 #ifdef NXDK
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #else
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #endif
 
 /*********************
