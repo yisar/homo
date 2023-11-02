@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "*.zig": "zig",
+        "*.sln": "cpp",
+        "lvgl.h": "c",
+        "lv_port_disp.h": "c",
+        "sdl.h": "c"
+    }
+}

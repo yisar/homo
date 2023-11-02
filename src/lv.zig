@@ -19,7 +19,7 @@ pub fn runLvgl() void {
 
     var lastTick: i64 = std.time.milliTimestamp();
     while (true) {
-        lv.lv_tick_inc(@intCast(u32, std.time.milliTimestamp() - lastTick));
+        lv.lv_tick_inc(@as(u32, @intCast(std.time.milliTimestamp() - lastTick)));
         lastTick = std.time.milliTimestamp();
         _=lv.lv_task_handler();
     }

@@ -17,8 +17,8 @@ pub fn drawFont(text: []const u8, x: i32, y: i32) void {
 
     const font_file = @embedFile("../asset/Sans.ttf");
     const font_rw = sdl.SDL_RWFromConstMem(
-        @ptrCast(*const anyopaque, &font_file[0]),
-        @intCast(c_int, font_file.len),
+        @as(*const anyopaque,@ptrCast(&font_file[0])),
+        @as(c_int, @intCast(font_file.len)),
     );
     defer std.debug.assert(sdl.SDL_RWclose(font_rw) == 0);
 

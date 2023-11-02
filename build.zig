@@ -1,50 +1,61 @@
 const std = @import("std");
 const log = std.debug.print;
 
-pub fn build(b: *std.build.Builder) void {
+pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const mode = b.standardReleaseOptions();
+    const optimize = b.standardOptimizeOption(.{});
 
-    const quickjs = b.addStaticLibrary("quickjs", "src/dummy.zig");
-    quickjs.addIncludePath("clib/quickjs");
-    quickjs.disable_sanitize_c = true;
-    quickjs.addCSourceFiles(&.{
-        "clib/quickjs/cutils.c",
-        "clib/quickjs/libbf.c",
-        "clib/quickjs/libunicode.c",
-        "clib/quickjs/quickjs-libc.c",
-        "clib/quickjs/quickjs.c",
-        "clib/quickjs/libregexp.c",
-    }, &.{
-        "-g",
-        "-Wall",
-        "-D_GNU_SOURCE",
-        "-DCONFIG_VERSION=\"2021-03-27\"",
-        "-DCONFIG_BIGNUM",
+    const quickjs = b.addStaticLibrary(.{
+        .name = "quickjs",
+        .root_source_file = .{ .path = "src/dummy.zig" },
+        .target = target,
+        .optimize = optimize,
     });
-    quickjs.linkLibC();
-    quickjs.install();
-    quickjs.setTarget(target);
-    quickjs.setBuildMode(mode);
+    quickjs.addIncludePath(.{ .path = "clib/quickjs" });
+    quickjs.disable_sanitize_c = true;
 
-    const exe = b.addExecutable("fre", "src/main.zig");
-    exe.setTarget(target);
-    exe.setBuildMode(mode);
-    exe.addIncludePath("clib/quickjs");
+    quickjs.addCSourceFiles(.{
+        .files = &.{
+            "clib/quickjs/cutils.c",
+            "clib/quickjs/libbf.c",
+            "clib/quickjs/libunicode.c",
+            "clib/quickjs/quickjs-libc.c",
+            "clib/quickjs/quickjs.c",
+            "clib/quickjs/libregexp.c",
+        },
+        .flags = &.{
+            "-g",
+            "-Wall",
+            "-D_GNU_SOURCE",
+            "-DCONFIG_VERSION=\"2021-03-27\"",
+            "-DCONFIG_BIGNUM",
+        },
+    });
+
+    quickjs.linkLibC();
+    b.installArtifact(quickjs);
+
+    const exe = b.addExecutable(.{
+        .name = "fre",
+        .root_source_file = .{ .path = "src/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+    exe.addIncludePath(.{ .path = "clib/quickjs" });
     exe.linkLibC();
     exe.linkLibrary(quickjs);
-    exe.install();
+    b.installArtifact(exe);
 
     if (target.getOsTag() == .windows) {
-        quickjs.addIncludePath("clib/mingw-w64-winpthreads/include");
-        exe.addObjectFile("clib/mingw-w64-winpthreads/lib/libpthread.a");
+        quickjs.addIncludePath(.{ .path = "clib/mingw-w64-winpthreads/include" });
+        exe.addObjectFile(.{ .path = "clib/mingw-w64-winpthreads/lib/libpthread.a" });
     }
 
     // init lvgl
     exe.linkLibC();
 
-    exe.addIncludePath("./clib/lvgl");
-    exe.addIncludePath("./clib/lvgl_drv");
+    exe.addIncludePath(.{ .path = "./clib/lvgl" });
+    exe.addIncludePath(.{ .path = "./clib/lvgl_drv" });
 
     const cflags = [_][]const u8{
         // TODO:
@@ -152,31 +163,31 @@ pub fn build(b: *std.build.Builder) void {
         "clib/lvgl/src/font/lv_font.c",
         "clib/lvgl/src/font/lv_font_fmt_txt.c",
         "clib/lvgl/src/font/lv_font_montserrat_14.c",
-        
+
         // lvgl_drv
         "clib/lvgl_drv/lv_sdl_disp.c",
         "clib/lvgl_drv/lv_port_indev.c",
         "clib/lvgl_drv/lv_xbox_disp.c",
-
     };
-    exe.addCSourceFiles(&lvgl_source_files, &cflags);
+    exe.addCSourceFiles(.{
+        .files = &lvgl_source_files,
+        .flags = &cflags,
+    });
 
     // init sdl
 
-
-    if ( target.getOsTag() == .macos and
-         target.getCpuArch().isAARCH64() ) {
-
+    if (target.getOsTag() == .macos and
+        target.getCpuArch().isAARCH64())
+    {
         const homebrew_path = "/opt/homebrew";
-        exe.addIncludePath(homebrew_path ++ "/include/SDL2");
-        exe.addLibraryPath(homebrew_path ++ "/lib");
+        exe.addIncludePath(.{ .path = homebrew_path ++ "/include/SDL2" });
+        exe.addLibraryPath(.{ .path = homebrew_path ++ "/lib" });
 
         exe.linkSystemLibrary("SDL2");
-    }
-    else {
-        const sdl_path = "D:\\SDL2-2.0.14\\";
-        exe.addIncludePath(sdl_path ++ "include");
-        exe.addLibraryPath(sdl_path ++ "lib\\x64");
+    } else {
+        const sdl_path = "D:\\SDL2_2.28.4\\x86_64-w64-mingw32\\";
+        exe.addIncludePath(.{ .path = sdl_path ++ "include" });
+        exe.addLibraryPath(.{ .path = sdl_path ++ "lib\\x64" });
         b.installBinFile(sdl_path ++ "lib\\x64\\SDL2.dll", "SDL2.dll");
         b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_image.dll", "SDL2_image.dll");
         b.installBinFile(sdl_path ++ "lib\\x64\\SDL2_ttf.dll", "SDL2_ttf.dll");
@@ -185,10 +196,16 @@ pub fn build(b: *std.build.Builder) void {
         exe.linkSystemLibrary("sdl2_ttf");
     }
 
+   
+    // This line of code specifies the subsystem of the executable as Windows.
+    // exe.subsystem = .Windows;
+
     exe.linkLibC();
 
-    const run_cmd = exe.run();
+    const run_cmd = b.addRunArtifact(exe);
+
     run_cmd.step.dependOn(b.getInstallStep());
+
     if (b.args) |args| {
         run_cmd.addArgs(args);
     }
@@ -196,10 +213,14 @@ pub fn build(b: *std.build.Builder) void {
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
 
-    const exe_tests = b.addTest("src/main.zig");
-    exe_tests.setTarget(target);
-    exe_tests.setBuildMode(mode);
+    const unit_tests = b.addTest(.{
+        .root_source_file = .{ .path = "src/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const run_unit_tests = b.addRunArtifact(unit_tests);
 
     const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&exe_tests.step);
+    test_step.dependOn(&run_unit_tests.step);
 }
